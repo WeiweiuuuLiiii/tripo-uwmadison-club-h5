@@ -16,21 +16,34 @@ import { create } from 'zustand'
 export type JourneyStore = {
   zoneIndex: number
   ready: boolean
+  expandedZone: string | null // which HUD card is expanded (null = none)
+  gyroOn: boolean
   setZone: (i: number) => void
   setReady: (v: boolean) => void
+  setExpanded: (id: string | null) => void
+  setGyroOn: (v: boolean) => void
 }
 
 export const useJourney = create<JourneyStore>((set) => ({
   zoneIndex: 0,
   ready: false,
+  expandedZone: null,
+  gyroOn: false,
   setZone: (i) => set((s) => (s.zoneIndex === i ? s : { zoneIndex: i })),
   setReady: (v) => set((s) => (s.ready === v ? s : { ready: v })),
+  setExpanded: (id) => set((s) => (s.expandedZone === id ? s : { expandedZone: id })),
+  setGyroOn: (v) => set((s) => (s.gyroOn === v ? s : { gyroOn: v })),
 }))
 
+// per-frame mutable state (no React re-render); written by Rig/gyro, read in useFrame
 export const frame = {
   offset: 0, // 0..1 raw scroll progress
   reveal: 0, // 0..1 hero generation (point-cloud → wireframe → textured)
-  dragYaw: 0, // clamped radians, look-around
+  dragYaw: 0, // clamped radians, finger look-around
   dragPitch: 0,
+  gyroYaw: 0, // clamped radians, device-orientation look
+  gyroPitch: 0,
+  gyroGain: 1, // 1 normal, reduced when a card is expanded / near QR
   reducedMotion: false, // calms spins/particles; the 3D world still runs
+  locked: false, // outer scroll frozen (card expanded) → hold camera in this zone
 }

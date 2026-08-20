@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { useReveal } from '../hooks/useReveal'
+import { useJourney } from '../immersive/store'
 import { ContactQR } from './ContactQR'
 
 /** Fade/rise a block in when it enters view (never leaves content invisible). */
@@ -12,45 +13,70 @@ function R({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   )
 }
 
+const scrollToJoin = () => document.getElementById('z07')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
 /**
- * A guided-journey zone. Content zones render a COMPACT bottom card (summary
- * always visible in the lower ~40%) with details behind a tap-to-expand toggle,
- * so the 3D world stays visible above. Expanding grows the card within the fixed
- * 100vh section (internal scroll) — it never shifts the camera. All detail text
- * stays in the DOM for SEO and zero-tap reading of the summary.
+ * A guided-journey zone card. Collapsed = a compact summary in the lower ~40%,
+ * 3D visible above. Expanded = a flex column of [sticky header · scrollable body
+ * · footer CTA] sized to the dynamic viewport (dvh) with safe-area insets, so the
+ * last line always clears the CTA and the notch/toolbar. Only one card expands at
+ * a time (global store) and expanding never moves the camera (see useScrollLock).
  */
 function HudZone({
   id,
+  num,
   eyebrow,
   title,
   summary,
   details,
 }: {
   id: string
+  num: string
   eyebrow: string
   title: ReactNode
   summary: ReactNode
   details: ReactNode
 }) {
-  const [open, setOpen] = useState(false)
+  const open = useJourney((s) => s.expandedZone === id)
+  const setExpanded = useJourney((s) => s.setExpanded)
+  const { ref, shown } = useReveal<HTMLDivElement>()
   return (
     <section className="zone" id={id}>
-      <div className={`hud-card${open ? ' open' : ''}`}>
-        <R>
-          <span className="eyebrow">{eyebrow}</span>
+      <div ref={ref} className={`hud-card reveal${shown ? ' in' : ''}${open ? ' open' : ''}`}>
+        <div className="hud-head">
+          <div className="hud-head-row">
+            <span className="eyebrow">{eyebrow}</span>
+            <span className="hud-prog">{num} / 07</span>
+          </div>
           <h2 className="ov-h2">{title}</h2>
           <div className="hud-summary">{summary}</div>
-          <button className="hud-expand" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
-            {open ? '收起' : '展开详情'} <span className="chev">{open ? '▴' : '▾'}</span>
+          <div className="hud-actions">
+            <button className="hud-expand" onClick={() => setExpanded(open ? null : id)} aria-expanded={open}>
+              {open ? '收起' : '展开详情'} <span className="chev">{open ? '▴' : '▾'}</span>
+            </button>
+            <button className="hud-join" onClick={scrollToJoin}>
+              立即加入 <span className="chev">→</span>
+            </button>
+          </div>
+        </div>
+        <div className="hud-body">
+          <div className="hud-body-inner">{details}</div>
+        </div>
+        <div className="hud-footer">
+          <button
+            className="btn btn-primary"
+            onClick={() => {
+              setExpanded(null)
+              scrollToJoin()
+            }}
+          >
+            立即加入
           </button>
-          <div className="hud-body">{details}</div>
-        </R>
+        </div>
       </div>
     </section>
   )
 }
-
-const scrollToJoin = () => document.getElementById('z07')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
 export function Panels() {
   return (
@@ -77,6 +103,7 @@ export function Panels() {
       {/* 02 · GENERATION CORE */}
       <HudZone
         id="z02"
+        num="02"
         eyebrow="GENERATION CORE · 生成核心"
         title="看一句 Prompt，如何长成一个完整的三维模型"
         summary={
@@ -101,6 +128,7 @@ export function Panels() {
       {/* 03 · PIPELINE */}
       <HudZone
         id="z03"
+        num="03"
         eyebrow="THE PIPELINE · 创作管线"
         title="从 Prompt 到可运行 Demo，亲手走完一条完整开发链"
         summary={
@@ -128,6 +156,7 @@ export function Panels() {
       {/* 04 · PROJECT LAB */}
       <HudZone
         id="z04"
+        num="04"
         eyebrow="PROJECT LAB · 项目实验室"
         title="这里不是每月听一次讲座，而是一支真正做项目的团队"
         summary={<p className="ov-lead">轻触上方工作台可以观察每一类真实 3D 资产：角色、载具、道具与场景。</p>}
@@ -153,6 +182,7 @@ export function Panels() {
       {/* 05 · SEMESTER JOURNEY */}
       <HudZone
         id="z05"
+        num="05"
         eyebrow="SEMESTER JOURNEY · 学期轨道"
         title="你的一个学期，将从第一次生成走向最终舞台"
         summary={<p className="pull">加入时你带来的可能只是一个想法，离开时你应该带走一件真正可以展示的作品。</p>}
@@ -175,6 +205,7 @@ export function Panels() {
       {/* 06 · OPPORTUNITY DECK */}
       <HudZone
         id="z06"
+        num="06"
         eyebrow="OPPORTUNITY DECK · 资源与职业"
         title="我们提供的不只是活动，而是把创意推向现实的资源"
         summary={

@@ -1,4 +1,15 @@
+import { frame } from '../immersive/store'
+
 const QR_SRC = `${import.meta.env.BASE_URL}qr-host-wechat.jpg`
+
+// Pause the gyro camera response while the QR is pressed, so it holds perfectly
+// still for WeChat long-press recognition; restore the near-QR calm gain after.
+const holdGyro = () => {
+  frame.gyroGain = 0
+}
+const releaseGyro = () => {
+  frame.gyroGain = 0.15
+}
 
 /**
  * The contact QR. Deliberately a plain semantic <img> layered ABOVE the canvas
@@ -18,6 +29,10 @@ export function ContactQR() {
             alt="联系人微信二维码，长按识别添加"
             loading="lazy"
             decoding="async"
+            onPointerDown={holdGyro}
+            onPointerUp={releaseGyro}
+            onPointerCancel={releaseGyro}
+            onPointerLeave={releaseGyro}
           />
         </div>
       </div>

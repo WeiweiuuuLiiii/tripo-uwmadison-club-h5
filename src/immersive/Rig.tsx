@@ -82,12 +82,21 @@ export function Rig() {
 
     camera.position.copy(pos.current)
     camera.lookAt(look.current)
-    camera.rotateY(frame.dragYaw)
-    camera.rotateX(frame.dragPitch)
+    // finalCamera = scrollRail + gyroOffset + dragOffset
+    const yaw = frame.dragYaw + frame.gyroYaw
+    const pitch = frame.dragPitch + frame.gyroPitch
+    camera.rotateY(yaw)
+    camera.rotateX(pitch)
+    // positional parallax from the gyro (near objects shift more than far)
+    const MAX_YAW = 0.157 // rad ≈ 9°
+    const MAX_PITCH = 0.105 // rad ≈ 6°
+    camera.translateX(THREE.MathUtils.clamp((frame.gyroYaw / MAX_YAW) * 0.42, -0.42, 0.42))
+    camera.translateY(THREE.MathUtils.clamp((frame.gyroPitch / MAX_PITCH) * 0.22, -0.22, 0.22))
+    // finger drag recentres; gyro is held by its own low-pass
     frame.dragYaw = THREE.MathUtils.lerp(frame.dragYaw, 0, 1 - Math.pow(0.02, dt))
     frame.dragPitch = THREE.MathUtils.lerp(frame.dragPitch, 0, 1 - Math.pow(0.02, dt))
 
-    setZone(zoneOf(offset))
+    if (!frame.locked) setZone(zoneOf(offset))
     if (!started.current) {
       started.current = true
       setReady(true)
