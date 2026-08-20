@@ -73,23 +73,25 @@
   margin: 0 auto;
   padding: 0 var(--pad);
 }
-/* content zones get a frosted card so text reads over the busy 3D world */
-.zone:not(.center) .ov-panel {
-  max-width: 600px;
-}
-.zone:not(.center) .ov-panel > .reveal {
+
+/* ---- content zones: a compact frosted HUD card pinned to the lower ~40% ---- */
+.hud-card {
   position: relative;
-  background: linear-gradient(180deg, rgba(9, 12, 16, 0.55), rgba(7, 9, 12, 0.42));
-  -webkit-backdrop-filter: saturate(135%) blur(14px);
-  backdrop-filter: saturate(135%) blur(14px);
+  width: calc(100% - 2 * var(--pad));
+  max-width: 560px;
+  margin: 0 var(--pad);
+  max-height: 46vh;
+  padding: 18px 18px 16px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 22px 20px;
+  background: linear-gradient(180deg, rgba(9, 12, 16, 0.6), rgba(7, 9, 12, 0.48));
+  -webkit-backdrop-filter: saturate(135%) blur(14px);
+  backdrop-filter: saturate(135%) blur(14px);
   box-shadow: var(--shadow), inset 0 0 0 1px rgba(110, 231, 255, 0.04);
+  transition: max-height 0.45s cubic-bezier(0.22, 0.7, 0.2, 1);
   overflow: hidden;
 }
-/* holographic bezel: bright ice hairline across the top edge */
-.zone:not(.center) .ov-panel > .reveal::before {
+.hud-card::before {
   content: "";
   position: absolute;
   left: 16px;
@@ -98,7 +100,39 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(110, 231, 255, 0.55), transparent);
 }
-.zone:not(.center) .ov-panel > .reveal + .reveal { margin-top: 12px; }
+.hud-card.open { max-height: 84vh; }
+.hud-summary { margin-top: 4px; }
+.hud-summary > * { margin-top: 0; }
+.hud-expand {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ice);
+  background: rgba(110, 231, 255, 0.08);
+  border: 1px solid rgba(110, 231, 255, 0.28);
+  border-radius: 999px;
+  padding: 8px 14px;
+  min-height: 38px;
+}
+.hud-expand .chev { font-size: 10px; }
+.hud-body {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.45s cubic-bezier(0.22, 0.7, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
+}
+.hud-card.open .hud-body {
+  max-height: 60vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  opacity: 1;
+  margin-top: 16px;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ---- Zone 01 / 07 hero-style copy ---- */
 .ov-kicker {
@@ -285,12 +319,86 @@
 
 /* ---- desktop: give the overlay a readable column, rail room ---- */
 @media (min-width: 900px) {
-  .ov-panel { max-width: 620px; margin-left: max(6vw, 80px); }
-  .zone.center .ov-panel { margin: 0 auto; }
+  /* content panels take at most ~40% width; the 3D world fills the rest */
+  .ov-panel { max-width: min(540px, 40vw); margin-left: max(5vw, 72px); }
+  .zone.center .ov-panel { margin: 0 auto; max-width: 620px; }
+  .hud-card { max-width: min(520px, 40vw); margin-left: max(5vw, 72px); max-height: 60vh; }
+  .hud-card.open { max-height: 88vh; }
   .fact-grid { grid-template-columns: 1fr 1fr 1fr; }
   .deck-cols { grid-template-columns: 1fr 1fr; gap: 20px; }
   .prog-rail { left: 22px; }
 }
+
+/* ---- mode toggle (immersive → simple) ---- */
+.mode-toggle {
+  position: fixed;
+  top: calc(var(--safe-top) + 12px);
+  right: 12px;
+  z-index: 35;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--silver);
+  padding: 8px 13px;
+  min-height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(184, 192, 200, 0.28);
+  background: rgba(10, 13, 17, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.mode-toggle:active { transform: translateY(1px); }
+
+/* ---- Lite page → enter 3D ---- */
+.enter3d-toggle {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: 12px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #eaf2f8;
+  padding: 10px 15px;
+  min-height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 231, 255, 0.45);
+  background: linear-gradient(180deg, rgba(43, 49, 56, 0.92), rgba(20, 24, 29, 0.92));
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+}
+.enter3d-toggle .e3-dot { width: 6px; height: 6px; border-radius: 50%; background: #6ee7ff; box-shadow: 0 0 10px #6ee7ff; }
+
+/* ---- runtime fail overlay (no permanent lock; user chooses) ---- */
+.fail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(60% 60% at 50% 45%, rgba(10, 14, 19, 0.9), rgba(6, 8, 11, 0.96));
+}
+.fail-card {
+  max-width: 340px;
+  text-align: center;
+  border: 1px solid rgba(184, 192, 200, 0.2);
+  border-radius: 18px;
+  padding: 26px 22px;
+  background: rgba(18, 22, 27, 0.9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  font-family: var(--font-disp, sans-serif);
+}
+.fail-title { font-size: 18px; font-weight: 700; color: #f2f5f8; margin-bottom: 8px; }
+.fail-sub { font-size: 14px; line-height: 1.7; color: #aeb7c0; margin: 0 0 18px; }
+.fail-btns { display: grid; gap: 10px; }
+.fail-card .btn-ghost { color: #eaf2f8; border-color: rgba(184, 192, 200, 0.4); background: rgba(184, 192, 200, 0.06); }
 
 /* ---- reduced motion: the loader + spins calm down (Lite usually takes over) ---- */
 @media (prefers-reduced-motion: reduce) {

@@ -1,40 +1,51 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import '../styles/immersive.css'
+import { useProgress } from '@react-three/drei'
 import { Loader } from '../overlay/Loader'
 import { Panels } from '../overlay/Panels'
 import { ProgressRail } from '../overlay/ProgressRail'
-import { useJourney } from './store'
+import { ModeToggle } from '../overlay/ModeToggle'
+import { useJourney, frame } from './store'
+import { preloadCore } from './models'
+import { prefersReducedMotion } from '../lib/mode'
 
 const Canvas3D = lazy(() => import('./Canvas3D'))
+preloadCore()
 
 /**
- * The immersive shell: a FIXED WebGL world behind normal-flow HTML sections that
- * scroll over it (native scroll = smooth WeChat momentum). The camera follows the
- * document scroll (see Rig); the overlay stays fully semantic — text, buttons,
- * disclaimer and the QR are real HTML, never drawn into the canvas.
+ * Immersive shell: a FIXED WebGL world behind normal-flow HTML sections that
+ * scroll over it. The camera follows the document scroll (see Rig). The overlay
+ * is fully semantic HTML — text, buttons, disclaimer, QR — never drawn to canvas.
+ * The loader shows REAL asset progress (useProgress) until the GLB world is ready.
  */
-export default function ImmersiveApp({ goLite }: { goLite: () => void }) {
-  const ready = useJourney((s) => s.ready)
+export default function ImmersiveApp({ onFail }: { onFail: () => void }) {
+  const { active, progress } = useProgress()
   const zoneIndex = useJourney((s) => s.zoneIndex)
-  const [pct, setPct] = useState(6)
   const [done, setDone] = useState(false)
-  const pctRef = useRef(6)
+  const started = useRef(false)
 
   useEffect(() => {
-    if (ready) return
-    const id = window.setInterval(() => {
-      pctRef.current = Math.min(88, pctRef.current + Math.random() * 9)
-      setPct(pctRef.current)
-    }, 180)
-    return () => window.clearInterval(id)
-  }, [ready])
+    frame.reducedMotion = prefersReducedMotion()
+  }, [])
 
   useEffect(() => {
-    if (!ready) return
-    setPct(100)
-    const t = window.setTimeout(() => setDone(true), 650)
-    return () => window.clearTimeout(t)
-  }, [ready])
+    if (active) started.current = true
+  }, [active])
+
+  useEffect(() => {
+    // hide once real loading has begun and finished…
+    if (started.current && !active && progress >= 100) {
+      const t = window.setTimeout(() => setDone(true), 600)
+      return () => window.clearTimeout(t)
+    }
+    return
+  }, [active, progress])
+
+  useEffect(() => {
+    // …and a hard cap so the loader can never hang the page
+    const cap = window.setTimeout(() => setDone(true), 20000)
+    return () => window.clearTimeout(cap)
+  }, [])
 
   const atJoin = zoneIndex === 6
 
@@ -42,7 +53,7 @@ export default function ImmersiveApp({ goLite }: { goLite: () => void }) {
     <div className="immersive">
       <div className="canvas-layer" aria-hidden="true">
         <Suspense fallback={null}>
-          <Canvas3D goLite={goLite} />
+          <Canvas3D onFail={onFail} />
         </Suspense>
         <div className="fx-scan" />
         <div className="fx-vignette" />
@@ -53,6 +64,7 @@ export default function ImmersiveApp({ goLite }: { goLite: () => void }) {
       </div>
 
       <ProgressRail />
+      <ModeToggle />
 
       <div className={`join-cta${atJoin ? ' hidden' : ''}`}>
         <button
@@ -63,7 +75,7 @@ export default function ImmersiveApp({ goLite }: { goLite: () => void }) {
         </button>
       </div>
 
-      {!done && <Loader progress={pct} done={ready} />}
+      {!done && <Loader progress={progress} done={started.current && !active && progress >= 100} />}
     </div>
   )
 }

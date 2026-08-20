@@ -28,16 +28,31 @@ Canvas**。轻触拖动可微调视角但不偏离主线；只滑动、不点击
   任一触发即回退到黑银 HTML 页（`src/lite/LiteApp.tsx`，即上一版全部文案 / CTA / 二维码 / 免责声明），
   **绝不白屏、不卡死、不阻断报名**。
 
-### 3D 内容来源与真实性
+### 3D 资产清单、来源与许可（`public/models/*.glb`, `public/env/*.hdr`）
 
-场景中的三维内容全部为**本项目在代码中程序化生成的原创风格化渲染**（位移 icosphere + 生成的钛金属
-matcap 贴图 + 点云/线框/PBR 过渡，见 `src/immersive/hero/heroAssets.ts`），**不下载任何外部模型、不用
-图库或伪造的社团照片**，因此始终可离线打包、可在微信加载。按规范标注：程序化视觉标 `CONCEPT
-VISUAL`，管线示例标 `WORKFLOW EXAMPLE`。若日后拿到 TRIPO 官方 GLB，放入 `public/models/hero.glb`
-（Draco/Meshopt），`useHeroModel` 已预留替换位并会改标 `TRIPO OFFICIAL SHOWCASE`（保持相同 API）。
+场景使用**真实、完整、带 PBR 贴图与法线的 `.glb` 模型**（非球体/方块/线稿占位）。全部为公开、明确许可
+的资产，本地打包（不 hotlink）。用 `@gltf-transform/cli optimize`（meshopt 几何 + WebP 贴图，1024/2048）
+压缩到移动端预算；缩略图 / Lite 图片由 `scripts/glb-render.mjs` 从这些模型实拍渲染。
 
-> 上一版黑银静态页（含 5 张 WebP 视觉）完整保留为 Lite 模式（`src/lite/`），下方图片素材说明仍适用于
-> Lite。`?lite=1` 可强制进入 Lite；`?lite=0` 强制尝试 3D。安全分支：`immersive-v3`；回退标签：`v4-titanium`。
+| 模型 | 3D 世界中的用途 | 来源 | 许可证 | 优化后 |
+|---|---|---|---|---|
+| `DamagedHelmet.glb` | **主角**：Zone02 点云→线框→贴图生成；`gallery.webp` | Khronos glTF-Sample-Models（theblueturtle_ / ctxwing） | **CC BY 4.0** | 1.4 MB |
+| `RobotExpressive.glb` | **动画角色**：Zone03/04/06/07（Idle/Wave/Dance）；`workflow.webp` | three.js examples（Tomás Laulhé · Quaternius） | **CC0** | 180 KB |
+| `LittlestTokyo.glb` | **完整环境场景**：Zone05/07 数字世界；`demo.webp` | three.js examples（Glen Fox） | **CC BY 4.0** | 2.6 MB |
+| `ferrari.glb` | 载具：Zone03/05；`roadmap.webp` | three.js examples | three.js examples（MIT 项目内示例资产） | 2.0 MB |
+| `ToyCar.glb` | 载具/产品：Zone03/04；`career.webp` | Khronos glTF-Sample-Models | **CC0** | 840 KB |
+| `Fox.glb` | 动画角色：Zone03/04（Survey/Walk） | Khronos / three examples（PixelMannen · @tomkranis） | **CC0** | 72 KB |
+| `Lantern.glb` | 带底座的道具场景：Zone04 | Khronos glTF-Sample-Models（Microsoft · Frank Galligan） | **CC BY 4.0** | 274 KB |
+| `env/studio_1k.hdr` | 全局 IBL 光照 / 金属反射 | Poly Haven | **CC0** | 1.5 MB |
+
+**修改方式**：替换 `public/models/*.glb` 同名文件即可（`Model` / `GenHero` 自动归一化居中）。重新压缩：
+`npx gltf-transform optimize in.glb out.glb --compress meshopt --texture-compress webp --texture-size 1024`。
+按规范标注：Zone02 主角标 `CONCEPT VISUAL`（示意 AI 生成的完整 3D 资产），管线标 `WORKFLOW EXAMPLE`；
+拿到 TRIPO 官方 GLB 后放入 `public/models/` 并把对应标签改为 `TRIPO OFFICIAL SHOWCASE`。
+
+> 模式：默认 `mode-3d`（只要 WebGL 可用）。`?lite=0` 强制 3D，`?lite=1` 强制简洁；页面右上角有可见切换。
+> reduce-motion 只降低镜头/粒子运动，不关闭 3D。运行失败临时降级并显示「重试 / 简洁」，**无永久锁定**。
+> 安全分支：`immersive-v3`；回退标签：`v4-titanium`。
 
 ## 本地开发
 
@@ -60,24 +75,20 @@ VISUAL`，管线示例标 `WORKFLOW EXAMPLE`。若日后拿到 TRIPO 官方 GLB�
 - **Space Grotesk**（400 / 500 / 700）—— 英文/数字/编号。来源：`@fontsource/space-grotesk`（OFL 1.1）。
 - **IBM Plex Mono**（400 / 500）—— 技术标签/数据。来源：`@fontsource/ibm-plex-mono`（OFL 1.1）。
 
-## 图片素材（`public/img/*.webp`）
+## 图片素材（`public/img/*.webp`）— Lite 模式使用
 
-全页仅 5 组核心视觉。这些**不是**图库照片，也**不是** TRIPO 官方截图，而是**本项目原创制作的
-风格化 3D 技术渲染 / 产品 UI Mockup**（用 SVG/Canvas 绘制后由 Chrome 渲染、`sharp` 转 WebP），
-统一为黑银钛金属、低饱和、少量冰蓝高光。源文件见 `scripts/assets/*.html`，可用
-`node scripts/gen-assets.mjs` 重新生成。均为下方尺寸 + `<img width height>`（无 CLS），首屏以外全部
-`loading="lazy"`。
+Lite 模式（简洁页）中的 5 张图**全部由上面的真实 GLB 模型经 `scripts/glb-render.mjs` 实拍渲染**
+（三点布光 + HDRI 环境反射，Chrome + `sharp` → WebP），原始宽度 ≥1600px，主体占画面 ≥70%，均带
+`<img width height>`（无 CLS）、首屏以外 `loading="lazy"`。**不再包含任何鸡蛋脸 / 方块 / 假窗口 /
+线稿占位图**。
 
-| 文件 | 用途 | 尺寸 | 大小 |
+| 文件 | 渲染自 | 尺寸 | 大小 |
 |---|---|---|---|
-| `gallery.webp` | 公司介绍 · 3D 资产样本墙（角色/机械/建筑/生物 + Text·Image→3D） | 760×760 | ~17 KB |
-| `workflow.webp` | Experience · 真实工作流（INPUT→GENERATE→REFINE→BUILD） | 640×939 | ~13 KB |
-| `roadmap.webp` | 学期路线 · 项目演进档案（v0.1→v1.0） | 620×813 | ~15 KB |
-| `career.webp` | 实习机会 · 作品集输出（LIVE DEMO / GITHUB / DECK / CASE STUDY） | 720×648 | ~8 KB |
-| `demo.webp` | Demo · 概念化 Demo Day 舞台（大屏 + 模型/代码/交互面板） | 900×506 | ~8 KB |
+| `gallery.webp` | DamagedHelmet（科幻头盔，完整 PBR） | 1600×1600 | ~222 KB |
+| `workflow.webp` | RobotExpressive（可动画角色） | 1600×1600 | ~77 KB |
+| `roadmap.webp` | ferrari（反光车漆载具） | 1600×1200 | ~76 KB |
+| `career.webp` | ToyCar（clearcoat 产品级模型） | 1600×1200 | ~87 KB |
+| `demo.webp` | LittlestTokyo（完整城市场景） | 1600×1000 | ~129 KB |
 
-首屏 3D 视觉为轻量 Canvas 点云球体 + 内部线框网格核心（`src/components/HeroVisual.tsx`），
-`prefers-reduced-motion` 时为静态帧，离屏/隐藏时暂停。
-
-> 若日后拿到 TRIPO 官方产品截图 / 官方 3D 生成案例，可直接替换 `public/img/` 中对应文件
-> （保持相同尺寸即可），并在此表记录官方来源链接。分享封面见 `scripts/share-cover.html`。
+沉浸式 3D 模式直接展示这些模型本身（见上一节资产清单），不使用这些静态图。
+重新渲染：`node scripts/glb-render.mjs`（需先 `npm run preview`）。分享封面见 `scripts/share-cover.html`。

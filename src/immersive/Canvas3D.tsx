@@ -1,97 +1,91 @@
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { AdaptiveDpr, PerformanceMonitor } from '@react-three/drei'
+import { AdaptiveDpr, Environment, PerformanceMonitor } from '@react-three/drei'
 import { Rig } from './Rig'
 import { ZoneField } from './zones/Zones'
-import { ParticleField, SpatialGrid } from './fx/Ambient'
+import { ParticleField } from './fx/Ambient'
+import { QUALITY, qualityTier } from '../lib/mode'
+
+const BASE = import.meta.env.BASE_URL
+const Q = QUALITY[qualityTier()]
 
 /**
- * Director: keeps `frameloop="demand"` battery-friendly while still feeling
- * alive. Renders for a short window after any scroll/drag (so damping settles
- * and motes drift), then rests. Pauses entirely when the tab is hidden. Also
- * the runtime Lite watchdog: no first frame in time, or a lost GL context, and
- * we bail to the HTML page instead of showing a frozen/black canvas.
+ * Director: drives `frameloop="demand"` at ~30fps while the tab is VISIBLE (so
+ * animated GLBs and the camera keep moving), and stops entirely when hidden —
+ * matching the 30fps target + pause-on-hidden budget. Also the runtime watchdog:
+ * no first frame in time, or a lost GL context → hand off to the fail UI.
  */
-function Director({ goLite }: { goLite: () => void }) {
+function Director({ onFail }: { onFail: () => void }) {
   const invalidate = useThree((s) => s.invalidate)
   const gl = useThree((s) => s.gl)
   const frames = useRef(0)
-  const lastActive = useRef(0)
 
   useFrame(() => {
     frames.current++
-    // lightweight render-frame counter for perf measurement / QA
-    ;(window as unknown as { __wf?: number }).__wf = ((window as unknown as { __wf?: number }).__wf || 0) + 1
   })
 
   useEffect(() => {
-    lastActive.current = performance.now()
     let raf = 0
-    let lastTick = 0
+    let last = 0
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop)
       if (document.hidden) return
-      // render for ~2.2s after the last interaction, capped ~33fps
-      if (t - lastActive.current < 2200 && t - lastTick > 30) {
-        lastTick = t
+      if (t - last >= 30) {
+        last = t
         invalidate()
       }
     }
     raf = requestAnimationFrame(loop)
-
-    const wake = () => {
-      lastActive.current = performance.now()
-      invalidate()
-    }
-    const onVis = () => {
-      if (!document.hidden) wake()
-    }
-    for (const ev of ['scroll', 'wheel', 'pointerdown', 'pointermove', 'touchmove', 'touchstart'] as const)
-      window.addEventListener(ev, wake, { passive: true })
+    const onVis = () => !document.hidden && invalidate()
     document.addEventListener('visibilitychange', onVis)
 
-    // watchdog: a first frame must render within 3.5s
     const wd = window.setTimeout(() => {
-      if (frames.current === 0) goLite()
-    }, 3500)
+      if (frames.current === 0) onFail()
+    }, 6000)
     const onLost = (e: Event) => {
       e.preventDefault()
-      goLite()
+      onFail()
     }
     gl.domElement.addEventListener('webglcontextlost', onLost)
 
     return () => {
       cancelAnimationFrame(raf)
       window.clearTimeout(wd)
-      for (const ev of ['scroll', 'wheel', 'pointerdown', 'pointermove', 'touchmove', 'touchstart'] as const)
-        window.removeEventListener(ev, wake)
       document.removeEventListener('visibilitychange', onVis)
       gl.domElement.removeEventListener('webglcontextlost', onLost)
     }
-  }, [invalidate, gl, goLite])
+  }, [invalidate, gl, onFail])
 
   return null
 }
 
-export default function Canvas3D({ goLite }: { goLite: () => void }) {
+export default function Canvas3D({ onFail }: { onFail: () => void }) {
   return (
     <Canvas
       frameloop="demand"
-      dpr={[1, 1.5]}
+      dpr={[1, Q.dprMax]}
       gl={{ antialias: false, alpha: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: false }}
-      camera={{ fov: 44, near: 0.1, far: 260, position: [0, 0.6, 15] }}
-      onCreated={({ gl }) => gl.setClearColor('#06080b', 1)}
+      camera={{ fov: 44, near: 0.1, far: 300, position: [0, 0.9, 15] }}
+      onCreated={({ gl }) => {
+        gl.setClearColor('#06080b', 1)
+        gl.toneMapping = 3 // ACESFilmicToneMapping
+        gl.toneMappingExposure = 1.05
+      }}
     >
       <color attach="background" args={['#06080b']} />
-      <fog attach="fog" args={['#06080b', 14, 96]} />
-      <hemisphereLight args={['#dfe6ec', '#10151a', 0.7]} />
-      <Rig />
-      <SpatialGrid />
-      <ParticleField />
-      <ZoneField />
+      <fog attach="fog" args={['#06080b', 16, 108]} />
+      <hemisphereLight args={['#c9d4de', '#0b1014', 0.55]} />
+      <directionalLight position={[6, 10, 6]} intensity={1.1} color="#eaf2f8" />
+      <directionalLight position={[-6, 4, -4]} intensity={0.4} color="#6ee7ff" />
+      <Suspense fallback={null}>
+        <Environment files={`${BASE}env/studio_1k.hdr`} environmentIntensity={Q.envIntensity} background={false} />
+        <Rig />
+        <ParticleField count={Q.particles} />
+        <ZoneField />
+      </Suspense>
       <PerformanceMonitor />
       <AdaptiveDpr />
-      <Director goLite={goLite} />
+      <Director onFail={onFail} />
     </Canvas>
   )
 }

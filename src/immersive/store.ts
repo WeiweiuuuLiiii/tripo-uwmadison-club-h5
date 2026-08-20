@@ -32,4 +32,5 @@ export const frame = {
   reveal: 0, // 0..1 hero generation (point-cloud → wireframe → textured)
   dragYaw: 0, // clamped radians, look-around
   dragPitch: 0,
+  reducedMotion: false, // calms spins/particles; the 3D world still runs
 }

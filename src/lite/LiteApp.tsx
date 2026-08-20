@@ -47,7 +47,7 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
-export default function LiteApp() {
+export default function LiteApp({ onEnter3D }: { onEnter3D?: () => void }) {
   const [ctaHidden, setCtaHidden] = useState(false)
   const joinRef = useRef<HTMLElement | null>(null)
   useEffect(() => {
@@ -60,6 +60,11 @@ export default function LiteApp() {
 
   return (
     <div className="app">
+      {onEnter3D && (
+        <button className="enter3d-toggle" onClick={onEnter3D} aria-label="进入沉浸式 3D 世界">
+          <span className="e3-dot" /> 进入沉浸 3D 世界
+        </button>
+      )}
       {/* ============ 1 · HERO ============ */}
       <header className="hero">
         <div className="hero-bg" aria-hidden="true">
@@ -152,13 +157,13 @@ export default function LiteApp() {
                 </div>
                 <img
                   src={IMG('gallery.webp')}
-                  width={760}
-                  height={760}
+                  width={1600}
+                  height={1600}
                   loading="lazy"
                   decoding="async"
-                  alt="TRIPO 生成的 3D 资产示例拼贴：AI 角色、机械产品模型、建筑场景与生物道具的银色线框渲染"
+                  alt="高精度 PBR 3D 资产渲染：一顶带完整贴图、法线与反光的科幻头盔模型"
                 />
-                <figcaption className="cap">TRIPO 能生成的 3D 资产类型 · 原创风格化渲染</figcaption>
+                <figcaption className="cap">带完整 PBR 贴图的 3D 资产 · 公开授权模型实时渲染</figcaption>
               </figure>
             </Reveal>
           </div>
@@ -255,13 +260,13 @@ export default function LiteApp() {
                 </div>
                 <img
                   src={IMG('workflow.webp')}
-                  width={640}
-                  height={939}
+                  width={1600}
+                  height={1600}
                   loading="lazy"
                   decoding="async"
-                  alt="真实工作流四步：INPUT 文字或参考图、GENERATE TRIPO 生成 3D 模型、REFINE Blender 线框优化、BUILD 导入 Unity/Unreal 场景"
+                  alt="带骨骼与 PBR 贴图的 3D 角色模型渲染，示意从生成到可动画角色的产出"
                 />
-                <figcaption className="cap">从 AI 生成走到可运行 Demo 的真实流程 · 原创风格化渲染</figcaption>
+                <figcaption className="cap">可动画的 3D 角色资产 · 公开授权模型实时渲染</figcaption>
               </figure>
             </Reveal>
             <Reveal delay={60}>
@@ -346,13 +351,13 @@ export default function LiteApp() {
                 </div>
                 <img
                   src={IMG('roadmap.webp')}
-                  width={620}
-                  height={813}
+                  width={1600}
+                  height={1200}
                   loading="lazy"
                   decoding="async"
-                  alt="同一项目的演进档案：概念草图、TRIPO 生成资产、引擎集成到最终 Demo，标注版本号与技术标签"
+                  alt="高精度带反光车漆材质的 3D 载具模型渲染，示意可进入引擎的成品资产"
                 />
-                <figcaption className="cap">同一项目从概念到最终 Demo 的演进 · 原创风格化渲染</figcaption>
+                <figcaption className="cap">可进入引擎的高精度载具资产 · 公开授权模型实时渲染</figcaption>
               </figure>
               </div>
             </Reveal>
@@ -433,13 +438,13 @@ export default function LiteApp() {
                 </div>
                 <img
                   src={IMG('career.webp')}
-                  width={720}
-                  height={648}
+                  width={1600}
+                  height={1200}
                   loading="lazy"
                   decoding="async"
-                  alt="作品集输出示意：可运行 Live Demo 画面、GitHub 项目代码结构、演讲 Deck 与 Case Study 标签"
+                  alt="带 clearcoat 车漆与精细贴图的 3D 产品模型渲染，示意可放入作品集的成品资产"
                 />
-                <figcaption className="cap">把项目沉淀为 Demo / GitHub / 演讲材料 · 原创风格化渲染</figcaption>
+                <figcaption className="cap">可放入作品集的成品级 3D 资产 · 公开授权模型实时渲染</figcaption>
               </figure>
               </div>
             </Reveal>
@@ -482,13 +487,13 @@ export default function LiteApp() {
                 </div>
                 <img
                   src={IMG('demo.webp')}
-                  width={900}
-                  height={506}
+                  width={1600}
+                  height={1000}
                   loading="lazy"
                   decoding="async"
-                  alt="Demo Day 概念舞台：大屏运行 AI 3D Demo，两侧显示模型、代码与交互面板"
+                  alt="完整的 3D 场景：带建筑、街道、电车、招牌与灯光的城市微缩世界渲染"
                 />
-                <figcaption className="cap">项目公开演示 · 概念化 Demo Day 舞台 · 原创风格化渲染</figcaption>
+                <figcaption className="cap">完整可探索的 3D 场景 · 公开授权模型实时渲染</figcaption>
               </figure>
             </Reveal>
             <Reveal delay={70}>

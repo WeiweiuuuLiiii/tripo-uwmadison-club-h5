@@ -11,7 +11,7 @@ p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
 p.on('pageerror', (e) => errors.push('PAGEERROR: ' + e.message))
 
 await p.goto(URL, { waitUntil: 'networkidle' })
-await p.waitForTimeout(2500) // let loader finish + first frames render
+await p.waitForTimeout(7000) // let loader finish + first frames render
 
 const info = await p.evaluate(() => {
   const c = document.querySelector('.canvas-layer canvas')
@@ -35,7 +35,7 @@ for (let i = 1; i <= 7; i++) {
     const el = document.getElementById(id)
     if (el) window.scrollTo({ top: el.offsetTop, behavior: 'instant' })
   }, id)
-  await p.waitForTimeout(1300)
+  await p.waitForTimeout(1700)
   await p.screenshot({ path: `${OUT}/iz-0${i}.png` })
   const txt = await p.evaluate((id) => {
     const el = document.getElementById(id)
@@ -47,7 +47,7 @@ for (let i = 1; i <= 7; i++) {
 // Lite mode
 const p2 = await b.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })
 await p2.goto(URL + '?lite=1', { waitUntil: 'networkidle' })
-await p2.waitForTimeout(800)
+await p2.waitForTimeout(1500)
 const liteInfo = await p2.evaluate(() => ({
   mode: document.documentElement.className,
   hasCanvas: !!document.querySelector('.canvas-layer canvas'),
