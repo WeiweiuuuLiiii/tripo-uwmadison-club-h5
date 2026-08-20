@@ -26,10 +26,16 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
           }
         })
       },
-      { threshold: 0.14, rootMargin: '0px 0px -8% 0px' },
+      { threshold: 0.08, rootMargin: '0px 0px -6% 0px' },
     )
     io.observe(el)
-    return () => io.disconnect()
+    // Safety net: if the observer never fires (fast scroll, anchor jump, odd
+    // WebView), reveal anyway so content is never stuck invisible.
+    const fallback = window.setTimeout(() => setShown(true), 900)
+    return () => {
+      io.disconnect()
+      window.clearTimeout(fallback)
+    }
   }, [])
 
   return { ref, shown }
