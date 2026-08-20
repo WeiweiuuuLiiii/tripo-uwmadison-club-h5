@@ -73,7 +73,7 @@ await page.waitForTimeout(1000)
 console.log('CTA_jumplink_reaches_join=' + (await inJoin()))
 
 // --- CTA 5: final button stays in join ---
-await page.getByRole('button', { name: '加入 TRIPO AI 3D Club' }).click()
+await page.getByRole('button', { name: '添加联系人微信' }).click()
 await page.waitForTimeout(600)
 console.log('CTA_final_stays_join=' + (await inJoin()))
 
