@@ -112,7 +112,7 @@ export default function App() {
         </div>
 
         <div className="scroll-hint" aria-hidden="true">
-          SCROLL TO CREATE
+          向下滑动，开始创造
           <div className="bar" />
         </div>
       </header>
@@ -122,7 +122,7 @@ export default function App() {
       <section className="section" id="about">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">01 / COMPANY</span>
+            <span className="eyebrow">关于 TRIPO</span>
             <h2 className="h-title">认识 TRIPO：让每个人都能创造三维世界</h2>
             <p className="lead">
               TRIPO 是由 VAST 打造的 AI 原生三维创作平台。通过文字或图片，创作者可以快速生成可继续编辑和使用的
@@ -153,7 +153,7 @@ export default function App() {
       <section className="section" id="why">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">02 / WHY NOW</span>
+            <span className="eyebrow">为什么是现在</span>
             <h2 className="h-title">AI 改变了图片，下一步就是整个三维世界</h2>
             <p className="lead">
               游戏里的角色、VR 中的空间、电影里的资产、数字人、产品原型和虚拟世界，都离不开 3D 内容。
@@ -176,13 +176,13 @@ export default function App() {
       <section className="section" id="what">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">03 / THE CLUB</span>
+            <span className="eyebrow">社团定位</span>
             <h2 className="h-title">不是“每月听一次讲座”，而是一支真正做项目的团队</h2>
           </Reveal>
           <Reveal delay={60}>
             <div className="cards two">
               <div className="card">
-                <span className="tag">OPEN COMMUNITY</span>
+                <span className="tag">面向所有人</span>
                 <h3>开放社区</h3>
                 <ul className="list">
                   <li>每月工作坊</li>
@@ -194,7 +194,7 @@ export default function App() {
                 </ul>
               </div>
               <div className="card accent">
-                <span className="tag">CORE PROJECT TEAM</span>
+                <span className="tag">进阶 · 需要投入</span>
                 <h3>核心项目组</h3>
                 <ul className="list">
                   <li>自主提出项目创意</li>
@@ -210,7 +210,7 @@ export default function App() {
           <Reveal delay={80}>
             <p className="pull">我们不要求每个人已经很厉害，但希望你愿意真的把东西做出来。</p>
             <div className="note-block">
-              该社团由 TRIPO 校园主理人发起。项目方向、技术栈、团队结构和最终成果由学生团队高度自主决定。
+              该社团由 TRIPO 校园联系人发起。项目方向、技术栈、团队结构和最终成果由学生团队高度自主决定。
             </div>
           </Reveal>
         </div>
@@ -220,7 +220,7 @@ export default function App() {
       <section className="section" id="experience">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">04 / HANDS-ON</span>
+            <span className="eyebrow">亲手上手</span>
             <h2 className="h-title">从 Prompt 到可运行 Demo，亲手走完一条完整开发链</h2>
           </Reveal>
           <Reveal delay={60}>
@@ -276,7 +276,7 @@ export default function App() {
       <section className="section" id="roadmap">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">05 / ROADMAP</span>
+            <span className="eyebrow">学期路线</span>
             <h2 className="h-title">你的一个学期，将从第一次生成走向最终舞台</h2>
           </Reveal>
           <Reveal delay={60}>
@@ -309,7 +309,7 @@ export default function App() {
       <section className="section" id="resources">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">06 / RESOURCES</span>
+            <span className="eyebrow">成员资源</span>
             <h2 className="h-title">我们提供的不只是活动，而是把创意推向现实的资源</h2>
           </Reveal>
           <Reveal delay={60}>
@@ -336,7 +336,7 @@ export default function App() {
       <section className="section" id="career">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">07 / OPPORTUNITY</span>
+            <span className="eyebrow">实习与职业</span>
             <h2 className="h-title">最值钱的，不只是简历上的一个 Club 名字</h2>
             <p className="lead">在这里，项目就是你的申请材料，Demo 就是你的能力证明。</p>
           </Reveal>
@@ -367,7 +367,7 @@ export default function App() {
       <section className="section" id="demo">
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">08 / SHOWCASE</span>
+            <span className="eyebrow">成果展示</span>
             <h2 className="h-title">作品不是做完就结束，而是要被真正看见</h2>
           </Reveal>
           <Reveal delay={60}>
@@ -387,7 +387,7 @@ export default function App() {
               你不仅要学会把产品做出来，还要学会站在台上，让别人理解它、记住它，并愿意为它提供下一步机会。
             </p>
             <button className="jumplink" onClick={() => scrollToId('join')}>
-              想了解核心项目组？联系主理人 <span className="arrow">→</span>
+              想了解核心项目组？联系招新负责人 <span className="arrow">→</span>
             </button>
           </Reveal>
         </div>
@@ -397,7 +397,7 @@ export default function App() {
       <section className="section qr-section" id="join" ref={joinRef}>
         <div className="wrap">
           <Reveal>
-            <span className="eyebrow">09 / JOIN US</span>
+            <span className="eyebrow">加入我们</span>
             <h2 className="h-title">AI 3D 不只属于程序员</h2>
             <div className="chips">
               {[
@@ -428,25 +428,25 @@ export default function App() {
           </Reveal>
 
           <Reveal delay={80}>
-            <div className="qr-title">主理人微信</div>
+            <div className="qr-title">联系人微信</div>
             <div className="qr-card">
               <img
                 src={QR_SRC}
                 width={888}
                 height={1131}
-                alt="主理人微信二维码，长按识别添加"
+                alt="联系人微信二维码，长按识别添加"
                 loading="lazy"
                 decoding="async"
               />
             </div>
-            <p className="qr-line">长按识别二维码，添加主理人</p>
+            <p className="qr-line">长按识别二维码，添加联系人</p>
             <p className="qr-note">
               添加时请备注：<b>姓名＋专业＋年级＋TRIPO</b>
             </p>
             <p className="qr-note">想进入核心项目组的同学，可以同时注明感兴趣的方向。</p>
             <div className="btn-row">
               <button className="btn btn-primary" onClick={() => scrollToId('join')}>
-                加入 TRIPO AI 3D Club
+                添加联系人微信
               </button>
             </div>
             <p className="qr-remark">请长按二维码识别</p>

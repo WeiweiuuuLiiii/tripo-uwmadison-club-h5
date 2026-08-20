@@ -7,71 +7,70 @@
       html, body { width: 1200px; height: 630px; overflow: hidden; }
       body {
         position: relative;
-        background: #070707;
-        font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif;
-        color: #f4ebdd;
+        background: #f7f8fa;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", system-ui, sans-serif;
+        color: #101318;
         background-image:
-          radial-gradient(60% 90% at 8% 0%, rgba(19,56,255,0.55), transparent 60%),
-          radial-gradient(70% 90% at 100% 100%, rgba(255,90,0,0.42), transparent 58%),
-          radial-gradient(60% 80% at 60% 120%, rgba(43,7,91,0.6), transparent 60%);
+          radial-gradient(60% 80% at 90% -10%, rgba(118, 215, 244, 0.30), transparent 60%),
+          radial-gradient(55% 70% at 4% 8%, rgba(91, 124, 250, 0.12), transparent 60%);
       }
       .grid {
-        position: absolute; inset: -10% -6% 0 -6%;
+        position: absolute; inset: -8% -6% 0 -6%;
         background-image:
-          linear-gradient(rgba(244,235,221,0.09) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(244,235,221,0.09) 1px, transparent 1px);
+          linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px);
         background-size: 46px 46px;
-        transform: perspective(900px) rotateX(60deg) translateY(4%);
+        transform: perspective(1000px) rotateX(60deg) translateY(2%);
         transform-origin: top center;
-        -webkit-mask-image: radial-gradient(80% 70% at 50% 20%, #000, transparent 78%);
+        -webkit-mask-image: radial-gradient(80% 66% at 50% 16%, #000, transparent 80%);
       }
-      .content { position: absolute; inset: 0; padding: 72px 78px; display: flex; flex-direction: column; justify-content: space-between; }
+      .content { position: absolute; inset: 0; padding: 76px 80px; display: flex; flex-direction: column; justify-content: space-between; }
       .top { display: flex; align-items: center; gap: 16px; }
       .badge {
-        font-family: ui-monospace, "SF Mono", Menlo, monospace;
-        font-size: 22px; letter-spacing: 0.24em; text-transform: uppercase;
-        color: rgba(244,235,221,0.8); border: 1.5px solid rgba(244,235,221,0.28);
-        padding: 10px 20px; border-radius: 999px;
+        font-size: 22px; font-weight: 700; letter-spacing: 0.02em;
+        color: #101318; background: #ffffff; border: 1px solid rgba(15,23,42,0.1);
+        padding: 11px 22px; border-radius: 999px; box-shadow: 0 4px 14px rgba(15,23,42,0.06);
       }
-      .season { font-family: ui-monospace, Menlo, monospace; font-size: 22px; letter-spacing: 0.18em; color: #ff8a3d; }
-      h1 { font-size: 118px; line-height: 0.98; font-weight: 850; letter-spacing: -0.03em; }
-      h1 .g { background: linear-gradient(100deg,#4d7bff,#a06bff 45%,#ff5a00); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      .sub { margin-top: 22px; font-size: 34px; font-weight: 700; color: rgba(244,235,221,0.86); letter-spacing: 0.01em; }
+      .season { font-size: 22px; font-weight: 650; letter-spacing: 0.01em; color: #5b7cfa; }
+      h1 { font-size: 116px; line-height: 1.0; font-weight: 760; letter-spacing: -0.04em; color: #101318; }
+      h1 .g { background: linear-gradient(110deg,#3f5bd4,#5b7cfa 45%,#76d7f4); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .sub { margin-top: 26px; font-size: 33px; font-weight: 600; color: #626a76; letter-spacing: 0.01em; }
       .bottom { display: flex; align-items: flex-end; justify-content: space-between; }
-      .school { font-size: 30px; font-weight: 700; letter-spacing: 0.02em; }
-      .school small { display:block; font-family: ui-monospace, Menlo, monospace; font-size: 18px; letter-spacing:0.16em; color: rgba(244,235,221,0.55); margin-top: 6px; text-transform: uppercase; }
-      /* isometric cube cluster */
-      .cubes { position: absolute; right: 70px; top: 150px; width: 360px; height: 340px; }
+      .school { font-size: 30px; font-weight: 700; color: #101318; letter-spacing: 0.01em; }
+      .school small { display:block; font-size: 18px; font-weight: 600; color: #8a929e; margin-top: 7px; }
+      /* glass / silver cube cluster */
+      .cubes { position: absolute; right: 74px; top: 150px; width: 360px; height: 340px; }
       .cube { position: absolute; }
-      .cube svg { display:block; }
     </style>
   </head>
   <body>
     <div class="grid"></div>
     <div class="cubes">
       <div class="cube" style="left:120px; top:0;">
-        <svg width="230" height="250" viewBox="0 0 230 250">
+        <svg width="238" height="258" viewBox="0 0 230 250">
           <defs>
-            <linearGradient id="a" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#4d7bff"/><stop offset="0.5" stop-color="#8a5cff"/><stop offset="1" stop-color="#ff5a00"/>
+            <linearGradient id="face" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+              <stop offset="1" stop-color="#76d7f4" stop-opacity="0.18"/>
             </linearGradient>
           </defs>
-          <g fill="none" stroke="url(#a)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M115 20 L200 68 L200 168 L115 216 L30 168 L30 68 Z" fill="url(#face)"/>
+          <g fill="none" stroke="#5b7cfa" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round" opacity="0.85">
             <path d="M115 20 L200 68 L200 168 L115 216 L30 168 L30 68 Z"/>
             <path d="M115 20 L115 118 M115 118 L200 68 M115 118 L30 68 M115 118 L115 216"/>
           </g>
         </svg>
       </div>
-      <div class="cube" style="left:0; top:120px; opacity:0.62;">
+      <div class="cube" style="left:0; top:126px; opacity:0.55;">
         <svg width="150" height="165" viewBox="0 0 230 250">
-          <g fill="none" stroke="rgba(244,235,221,0.55)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+          <g fill="none" stroke="rgba(16,19,24,0.4)" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round">
             <path d="M115 20 L200 68 L200 168 L115 216 L30 168 L30 68 Z"/>
             <path d="M115 20 L115 118 M115 118 L200 68 M115 118 L30 68 M115 118 L115 216"/>
           </g>
         </svg>
       </div>
-      <div class="cube" style="left:210px; top:200px;">
-        <svg width="60" height="60" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#ff5a00"/></svg>
+      <div class="cube" style="left:214px; top:206px;">
+        <svg width="52" height="52" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#5b7cfa"/></svg>
       </div>
     </div>
     <div class="content">
