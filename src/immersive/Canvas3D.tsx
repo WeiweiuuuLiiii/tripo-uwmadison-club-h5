@@ -36,6 +36,12 @@ function Director({ onFail }: { onFail: () => void }) {
       }
     }
     raf = requestAnimationFrame(loop)
+
+    // Always render on interaction, independent of the visibility-gated heartbeat,
+    // so scrolling can never freeze even if a webview mis-reports document.hidden.
+    const wake = () => invalidate()
+    for (const ev of ['scroll', 'wheel', 'pointerdown', 'pointermove', 'touchstart', 'touchmove'] as const)
+      window.addEventListener(ev, wake, { passive: true })
     const onVis = () => !document.hidden && invalidate()
     document.addEventListener('visibilitychange', onVis)
 
@@ -51,6 +57,8 @@ function Director({ onFail }: { onFail: () => void }) {
     return () => {
       cancelAnimationFrame(raf)
       window.clearTimeout(wd)
+      for (const ev of ['scroll', 'wheel', 'pointerdown', 'pointermove', 'touchstart', 'touchmove'] as const)
+        window.removeEventListener(ev, wake)
       document.removeEventListener('visibilitychange', onVis)
       gl.domElement.removeEventListener('webglcontextlost', onLost)
     }
