@@ -117,6 +117,7 @@ export default function App() {
         </div>
       </header>
 
+      <main>
       {/* ============ 2 · COMPANY ============ */}
       <section className="section" id="about">
         <div className="wrap">
@@ -235,7 +236,7 @@ export default function App() {
               ].map((t, i) => (
                 <div className={`step${i === 1 ? ' hot' : ''}`} key={i}>
                   <div className="dot">{i + 1}</div>
-                  <h4>{t}</h4>
+                  <div className="st-h">{t}</div>
                 </div>
               ))}
             </div>
@@ -452,6 +453,7 @@ export default function App() {
           </Reveal>
         </div>
       </section>
+      </main>
 
       {/* ============ FOOTER ============ */}
       <footer className="foot">

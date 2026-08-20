@@ -527,7 +527,8 @@ button {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-.step h4 {
+.step h4,
+.step .st-h {
   margin: 4px 0 4px;
   font-size: 17px;
   font-weight: 750;
