@@ -30,9 +30,27 @@
     <meta name="twitter:title" content="从一句话，到一个三维世界｜UW–Madison TRIPO AI 3D Club 招新" />
     <meta name="twitter:description" content="做真实 Demo、进入长期项目、获得 AI 3D 创作资源。优秀成员有机会连接公司及合作生态的实习、展示与项目渠道。" />
     <meta name="twitter:image" content="https://weiweiuuuliiii.github.io/tripo-uwmadison-club-h5/wechat-share-cover.jpg" />
+
+    <!-- critical inline boot: paints instantly (before any JS) so first paint is
+         immediate and there is never a white flash; React swaps #root on mount. -->
+    <style>
+      html, body { margin: 0; background: #06080b; }
+      #boot {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+        background: radial-gradient(60% 60% at 50% 45%, #0a0e13, #06080b);
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      #boot .r { width: 56px; height: 56px; border-radius: 50%; border: 1px solid rgba(184,192,200,.3); border-top-color: #6ee7ff; animation: bspin 1s linear infinite; }
+      #boot .l { font-family: ui-monospace, Menlo, monospace; font-size: 12px; letter-spacing: .22em; color: #aeb7c0; }
+      @keyframes bspin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { #boot .r { animation: none; } }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot"><div class="r"></div><div class="l">INITIALIZING&nbsp;3D&nbsp;WORLD</div></div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
