@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8"/><style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:900px;height:1180px;background:#0a0d11;font-family:ui-monospace,Menlo,monospace}
+  .board{position:absolute;inset:0;padding:22px;display:flex;flex-direction:column;gap:16px}
+  .hd{display:flex;justify-content:space-between;align-items:center;color:#8a929e;font-size:14px;letter-spacing:.12em;padding:2px 6px}
+  .hd b{color:#c6ccd3;font-weight:400}
+  .row{position:relative;flex:1;display:grid;grid-template-columns:300px 1fr;gap:18px;border:1px solid rgba(184,192,200,.18);border-radius:18px;overflow:hidden;
+    background:radial-gradient(120% 120% at 15% 0%,#161b21,#0b0e12 74%);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+  .vp{position:relative;border-right:1px solid rgba(184,192,200,.12)}
+  .vp .grid{position:absolute;inset:0;opacity:.5;background-image:linear-gradient(rgba(184,192,200,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(184,192,200,.05) 1px,transparent 1px);background-size:30px 30px}
+  svg{position:absolute;inset:0;width:100%;height:100%}
+  .meta{padding:22px 24px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+  .meta .ver{font-size:13px;letter-spacing:.14em;color:#6ee7ff}
+  .meta .nm{font-family:-apple-system,"PingFang SC",sans-serif;color:#e9edf2;font-size:24px;font-weight:600}
+  .meta .en{font-size:12px;letter-spacing:.16em;color:#7c8794}
+  .meta .tags{display:flex;gap:8px;margin-top:6px}
+  .meta .tags span{font-size:11px;color:#aeb6be;border:1px solid rgba(184,192,200,.24);border-radius:6px;padding:3px 8px}
+  .dt{position:absolute;right:20px;top:16px;font-size:12px;color:#6b727a}
+</style></head><body>
+<div class="board">
+  <div class="hd"><span>PROJECT ARCHIVE · <b>同一项目的演进</b></span><span>ID · TRIPO-CLUB-01</span></div>
+
+  <div class="row"><div class="vp"><div class="grid"></div>
+    <svg viewBox="0 0 300 250"><g transform="translate(150 130)" fill="none" stroke="#8f97a0" stroke-width="1.2" stroke-dasharray="5 5">
+      <ellipse rx="70" ry="86"/><path d="M-70 0 Q0 30 70 0 M0 -86 L0 86"/></g></svg><div class="dt">WK 01</div></div>
+    <div class="meta"><div class="ver">v0.1 · CONCEPT</div><div class="nm">概念 / 草图</div><div class="en">IDEA · REFERENCE</div>
+      <div class="tags"><span>Prompt</span><span>Moodboard</span></div></div></div>
+
+  <div class="row"><div class="vp"><div class="grid"></div>
+    <svg viewBox="0 0 300 250"><g transform="translate(150 130)" fill="none" stroke="#cfd5da" stroke-width="1.2">
+      <ellipse rx="70" ry="86"/><path d="M-70 0 Q0 30 70 0 M-56 -44 Q0 -8 56 -44 M0 -86 L0 86 M-46 50 Q0 84 46 50"/>
+      <circle cx="-24" cy="-14" r="3" fill="#6ee7ff" stroke="none"/><circle cx="24" cy="-14" r="3" fill="#6ee7ff" stroke="none"/></g></svg><div class="dt">WK 04</div></div>
+    <div class="meta"><div class="ver">v0.4 · GENERATED ASSET</div><div class="nm">生成资产</div><div class="en">TRIPO · MESH · PBR</div>
+      <div class="tags"><span>Text→3D</span><span>Retopo</span></div></div></div>
+
+  <div class="row"><div class="vp"><div class="grid"></div>
+    <svg viewBox="0 0 300 250"><g transform="translate(150 140)" fill="none" stroke="#cfd5da" stroke-width="1.1">
+      <path d="M-110 40 L0 90 L110 40 L0 -10 Z" opacity=".55"/><ellipse cx="0" cy="8" rx="52" ry="64"/><path d="M-52 8 Q0 40 52 8 M0 -56 L0 72"/>
+      <rect x="-14" y="18" width="28" height="24" stroke="#6ee7ff"/></g></svg><div class="dt">WK 08</div></div>
+    <div class="meta"><div class="ver">v0.7 · ENGINE INTEGRATION</div><div class="nm">引擎集成</div><div class="en">UNITY / UNREAL</div>
+      <div class="tags"><span>Rig</span><span>Interaction</span></div></div></div>
+
+  <div class="row"><div class="vp"><div class="grid"></div>
+    <svg viewBox="0 0 300 250"><rect x="46" y="46" width="208" height="130" rx="8" fill="none" stroke="#cfd5da" stroke-width="1.4"/>
+      <g transform="translate(150 111)" fill="none" stroke="#e7ebef" stroke-width="1.2"><ellipse rx="40" ry="48"/><path d="M-40 0 Q0 20 40 0 M0 -48 L0 48"/></g>
+      <circle cx="150" cy="150" r="14" fill="none" stroke="#6ee7ff" stroke-width="2"/><path d="M145 143 L157 150 L145 157 Z" fill="#6ee7ff"/></svg><div class="dt">WK 14</div></div>
+    <div class="meta"><div class="ver">v1.0 · FINAL DEMO</div><div class="nm">最终 Demo</div><div class="en">PLAYABLE · SHOWCASE</div>
+      <div class="tags"><span>Build</span><span>Case Study</span></div></div></div>
+</div>
+</body></html>

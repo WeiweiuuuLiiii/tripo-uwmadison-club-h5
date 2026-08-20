@@ -317,14 +317,14 @@ button { font-family: inherit; cursor: pointer; }
 .hero-visual {
   position: absolute;
   z-index: 1;
-  top: 8%;
-  right: -8%;
-  width: 92vw;
-  height: 66vh;
-  max-width: 560px;
+  top: 5%;
+  right: -12%;
+  width: 108vw;
+  height: 70vh;
+  max-width: 660px;
   pointer-events: none;
-  -webkit-mask-image: radial-gradient(62% 62% at 58% 42%, #000 55%, transparent 82%);
-  mask-image: radial-gradient(62% 62% at 58% 42%, #000 55%, transparent 82%);
+  -webkit-mask-image: radial-gradient(60% 60% at 60% 42%, #000 58%, transparent 84%);
+  mask-image: radial-gradient(60% 60% at 60% 42%, #000 58%, transparent 84%);
 }
 
 .hero .wrap { position: relative; z-index: 3; }
@@ -551,7 +551,8 @@ button { font-family: inherit; cursor: pointer; }
 .chip.k { border-color: rgba(110, 231, 255, 0.4); color: var(--accent-fg); }
 
 /* ============================================================ QR / contact (dark titanium) */
-.qr-section { padding-bottom: calc(130px + var(--safe-bottom)); text-align: center; }
+.qr-section { padding-top: 76px; padding-bottom: calc(76px + var(--safe-bottom)); text-align: center; }
+.qr-section > .wrap { position: relative; z-index: 2; }
 .qr-title { font-size: 21px; font-weight: 700; color: var(--fg); margin: 30px 0 6px; }
 .qr-frame {
   margin: 22px auto 0;
@@ -604,6 +605,71 @@ button { font-family: inherit; cursor: pointer; }
 .cta-brand .mk svg { width: 18px; height: 18px; }
 .cta-brand .tx { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.06em; color: var(--smoke); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cta-bar .btn { width: auto; min-height: 44px; padding: 0 20px; flex: 0 0 auto; font-size: 15px; }
+
+/* ============================================================ Figures / visuals */
+.fig {
+  position: relative;
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0a0d11;
+  box-shadow: var(--shadow);
+}
+.fig .fig-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(184, 192, 200, 0.14);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--silver);
+  background: linear-gradient(180deg, #12161b, #0c0f13);
+}
+.fig .fig-head .hi { color: var(--ice); }
+.fig img { width: 100%; height: auto; display: block; }
+.fig .cap {
+  padding: 11px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--fg-3);
+  border-top: 1px solid rgba(184, 192, 200, 0.12);
+  background: rgba(12, 15, 19, 0.6);
+}
+/* hover wireframe overlay (gallery) */
+.fig.wire::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background-image:
+    linear-gradient(rgba(110, 231, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(110, 231, 255, 0.1) 1px, transparent 1px);
+  background-size: 26px 26px;
+}
+.fig.wire:hover::after,
+.fig.wire:active::after { opacity: 1; }
+
+/* desktop two-column: text left, visual right — fills the empty right side */
+.split { display: grid; gap: 18px; margin-top: 24px; }
+@media (min-width: 900px) {
+  .section.two-col > .wrap { max-width: 980px; }
+  .split { grid-template-columns: 1.08fr 0.92fr; align-items: start; gap: 30px; }
+  .split .fig { margin-top: 0; position: sticky; top: 28px; }
+}
+
+/* contact: faint silver model outline behind QR (desktop decoration) */
+.qr-deco { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; display: none; }
+@media (min-width: 900px) {
+  .qr-deco { display: block; }
+  .qr-deco svg { position: absolute; right: 6%; top: 50%; width: 300px; height: 360px; transform: translateY(-50%); opacity: 0.14; }
+}
 
 /* ============================================================ Animations */
 @keyframes scan { 0%, 100% { opacity: 0.3; transform: translateX(0); } 50% { opacity: 1; transform: translateX(6px); } }

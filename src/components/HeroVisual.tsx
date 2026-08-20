@@ -20,15 +20,31 @@ export function HeroVisual() {
     const dpr = Math.min(2, window.devicePixelRatio || 1)
 
     // Fibonacci sphere point cloud
-    const N = 340
+    const N = 320
     const pts: { x: number; y: number; z: number; ice: boolean }[] = []
     const gold = Math.PI * (3 - Math.sqrt(5))
     for (let i = 0; i < N; i++) {
       const y = 1 - (i / (N - 1)) * 2
       const r = Math.sqrt(1 - y * y)
       const t = gold * i
-      pts.push({ x: Math.cos(t) * r, y, z: Math.sin(t) * r, ice: i % 17 === 0 })
+      pts.push({ x: Math.cos(t) * r, y, z: Math.sin(t) * r, ice: i % 19 === 0 })
     }
+
+    // Icosahedron wireframe "mesh core" forming inside the cloud
+    const g = (1 + Math.sqrt(5)) / 2
+    const iv = [
+      [-1, g, 0], [1, g, 0], [-1, -g, 0], [1, -g, 0],
+      [0, -1, g], [0, 1, g], [0, -1, -g], [0, 1, -g],
+      [g, 0, -1], [g, 0, 1], [-g, 0, -1], [-g, 0, 1],
+    ].map(([x, y, z]) => {
+      const l = Math.hypot(x, y, z)
+      return { x: (x / l) * 0.58, y: (y / l) * 0.58, z: (z / l) * 0.58 }
+    })
+    const ie = [
+      [0, 1], [0, 5], [0, 7], [0, 10], [0, 11], [1, 5], [1, 7], [1, 8], [1, 9],
+      [2, 3], [2, 4], [2, 6], [2, 10], [2, 11], [3, 4], [3, 6], [3, 8], [3, 9],
+      [4, 5], [4, 9], [4, 11], [5, 9], [5, 11], [6, 7], [6, 8], [6, 10], [7, 8], [7, 10], [8, 9], [10, 11],
+    ]
 
     let W = 0
     let H = 0
@@ -57,20 +73,35 @@ export function HeroVisual() {
       const tiltC = Math.cos(-0.42)
       const tiltS = Math.sin(-0.42)
 
-      const proj = pts.map((p) => {
-        // rotate Y
-        let x = p.x * cosA - p.z * sinA
-        let z = p.x * sinA + p.z * cosA
-        let y = p.y
-        // tilt X
-        const y2 = y * tiltC - z * tiltS
-        const z2 = y * tiltS + z * tiltC
-        y = y2
-        z = z2
-        const depth = (z + 1) / 2 // 0..1
-        return { sx: cx + x * R, sy: cy + y * R, depth, ice: p.ice }
-      })
+      const rot = (p: { x: number; y: number; z: number }) => {
+        const x = p.x * cosA - p.z * sinA
+        const z = p.x * sinA + p.z * cosA
+        const y2 = p.y * tiltC - z * tiltS
+        const z2 = p.y * tiltS + z * tiltC
+        return { sx: cx + x * R, sy: cy + y2 * R, depth: (z2 + 1) / 2 }
+      }
+      const proj = pts.map((p) => ({ ...rot(p), ice: p.ice }))
       proj.sort((a, b) => a.depth - b.depth)
+
+      // mesh core edges (draw behind points for a "forming model" read)
+      const ip = iv.map(rot)
+      for (const [a, b] of ie) {
+        const A = ip[a]
+        const B = ip[b]
+        const d = (A.depth + B.depth) / 2
+        ctx.strokeStyle = `rgba(210,216,222,${0.06 + d * 0.22})`
+        ctx.lineWidth = 1
+        ctx.beginPath()
+        ctx.moveTo(A.sx, A.sy)
+        ctx.lineTo(B.sx, B.sy)
+        ctx.stroke()
+      }
+      for (const v of ip) {
+        ctx.fillStyle = `rgba(110,231,255,${0.25 + v.depth * 0.5})`
+        ctx.beginPath()
+        ctx.arc(v.sx, v.sy, 1.6 + v.depth * 1.4, 0, Math.PI * 2)
+        ctx.fill()
+      }
 
       // faint links between near neighbours (subtle mesh)
       ctx.lineWidth = 1
@@ -88,38 +119,52 @@ export function HeroVisual() {
         }
       }
 
-      // points
+      // points (no shadowBlur — it's a heavy per-draw canvas op; the ice points
+      // get a brighter fill + a small halo ring instead)
       for (const p of proj) {
         const size = 0.7 + p.depth * 1.8
         const alpha = 0.18 + p.depth * 0.7
         if (p.ice) {
-          ctx.fillStyle = `rgba(110,231,255,${Math.min(1, alpha + 0.15)})`
-          ctx.shadowColor = 'rgba(110,231,255,0.6)'
-          ctx.shadowBlur = 6
+          ctx.fillStyle = `rgba(140,236,255,${Math.min(1, alpha + 0.25)})`
+          ctx.beginPath()
+          ctx.arc(p.sx, p.sy, size, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.strokeStyle = `rgba(110,231,255,${0.18 + p.depth * 0.22})`
+          ctx.lineWidth = 1
+          ctx.beginPath()
+          ctx.arc(p.sx, p.sy, size + 2.2, 0, Math.PI * 2)
+          ctx.stroke()
         } else {
           ctx.fillStyle = `rgba(210,216,222,${alpha})`
-          ctx.shadowBlur = 0
+          ctx.beginPath()
+          ctx.arc(p.sx, p.sy, size, 0, Math.PI * 2)
+          ctx.fill()
         }
-        ctx.beginPath()
-        ctx.arc(p.sx, p.sy, size, 0, Math.PI * 2)
-        ctx.fill()
       }
-      ctx.shadowBlur = 0
     }
 
-    const loop = () => {
-      angle += 0.0022
-      draw()
+    // ~30fps cap: half the main-thread cost of a 60fps redraw, still smooth.
+    let last = 0
+    const loop = (t: number) => {
       raf = requestAnimationFrame(loop)
+      if (t - last < 33) return
+      last = t
+      angle += 0.0044
+      draw()
     }
 
+    let startTimer = 0
     const start = () => {
       if (running || reduce) return
       running = true
-      raf = requestAnimationFrame(loop)
+      // Defer the animation loop so it doesn't compete with first paint / LCP.
+      startTimer = window.setTimeout(() => {
+        raf = requestAnimationFrame(loop)
+      }, 700)
     }
     const stop = () => {
       running = false
+      clearTimeout(startTimer)
       cancelAnimationFrame(raf)
     }
 

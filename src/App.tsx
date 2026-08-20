@@ -3,6 +3,7 @@ import { useReveal, useCountUp } from './hooks/useReveal'
 import { HeroVisual } from './components/HeroVisual'
 
 const QR_SRC = `${import.meta.env.BASE_URL}qr-host-wechat.jpg`
+const IMG = (n: string) => `${import.meta.env.BASE_URL}img/${n}`
 
 function Reveal({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const { ref, shown } = useReveal<HTMLDivElement>()
@@ -135,6 +136,23 @@ export default function App() {
                 数据来源：tripo3d.ai 官方页面（20M+ 创作者 · 已生成 200M 3D 模型）
               </p>
             </Reveal>
+            <Reveal delay={100}>
+              <figure className="fig wire">
+                <div className="fig-head">
+                  <span>Generated Assets</span>
+                  <span className="hi">TEXT · IMAGE → 3D</span>
+                </div>
+                <img
+                  src={IMG('gallery.webp')}
+                  width={760}
+                  height={760}
+                  loading="lazy"
+                  decoding="async"
+                  alt="TRIPO 生成的 3D 资产示例拼贴：AI 角色、机械产品模型、建筑场景与生物道具的银色线框渲染"
+                />
+                <figcaption className="cap">TRIPO 能生成的 3D 资产类型 · 原创风格化渲染</figcaption>
+              </figure>
+            </Reveal>
           </div>
         </section>
 
@@ -221,6 +239,23 @@ export default function App() {
                 <span>DEMO</span>
               </div>
             </Reveal>
+            <Reveal delay={40}>
+              <figure className="fig">
+                <div className="fig-head">
+                  <span>Real Production Pipeline</span>
+                  <span className="hi">INPUT → BUILD</span>
+                </div>
+                <img
+                  src={IMG('workflow.webp')}
+                  width={640}
+                  height={939}
+                  loading="lazy"
+                  decoding="async"
+                  alt="真实工作流四步：INPUT 文字或参考图、GENERATE TRIPO 生成 3D 模型、REFINE Blender 线框优化、BUILD 导入 Unity/Unreal 场景"
+                />
+                <figcaption className="cap">从 AI 生成走到可运行 Demo 的真实流程 · 原创风格化渲染</figcaption>
+              </figure>
+            </Reveal>
             <Reveal delay={60}>
               <div className="pipeline">
                 {[
@@ -271,13 +306,14 @@ export default function App() {
         </section>
 
         {/* ============ 6 · ROADMAP — ivory / rail ============ */}
-        <section className="section s-ivory" id="roadmap">
+        <section className="section s-ivory two-col" id="roadmap">
           <div className="wrap">
             <Reveal>
               <span className="eyebrow">SEMESTER ROADMAP</span>
               <h2 className="h-title">你的一个学期，将从第一次生成走向最终舞台</h2>
             </Reveal>
             <Reveal delay={60}>
+              <div className="split">
               <div className="rail">
                 <div className="prog" style={{ bottom: 6, top: 'auto', height: '86%' }} />
                 {[
@@ -294,6 +330,22 @@ export default function App() {
                     <p>{d}</p>
                   </div>
                 ))}
+              </div>
+              <figure className="fig">
+                <div className="fig-head">
+                  <span>Project Archive</span>
+                  <span className="hi">v0.1 → v1.0</span>
+                </div>
+                <img
+                  src={IMG('roadmap.webp')}
+                  width={620}
+                  height={813}
+                  loading="lazy"
+                  decoding="async"
+                  alt="同一项目的演进档案：概念草图、TRIPO 生成资产、引擎集成到最终 Demo，标注版本号与技术标签"
+                />
+                <figcaption className="cap">同一项目从概念到最终 Demo 的演进 · 原创风格化渲染</figcaption>
+              </figure>
               </div>
             </Reveal>
             <Reveal delay={70}>
@@ -340,7 +392,7 @@ export default function App() {
         </section>
 
         {/* ============ 8 · CAREER — dark dossier ============ */}
-        <section className="section s-dark" id="career">
+        <section className="section s-dark two-col" id="career">
           <div className="wrap">
             <Reveal>
               <span className="eyebrow">CAREER SIGNAL</span>
@@ -348,6 +400,7 @@ export default function App() {
               <p className="lead">在这里，项目就是你的申请材料，Demo 就是你的能力证明。</p>
             </Reveal>
             <Reveal delay={60}>
+              <div className="split">
               <div className="dossier">
                 <div className="sig">
                   <div className="row"><span className="en">PROJECT AS PROOF</span><span className="cn">项目即证明</span></div>
@@ -364,6 +417,22 @@ export default function App() {
                     <li>与真正的 AI 3D 产品、技术和行业需求建立连接</li>
                   </ul>
                 </div>
+              </div>
+              <figure className="fig">
+                <div className="fig-head">
+                  <span>Portfolio Output</span>
+                  <span className="hi">DEMO · GITHUB · DECK</span>
+                </div>
+                <img
+                  src={IMG('career.webp')}
+                  width={720}
+                  height={648}
+                  loading="lazy"
+                  decoding="async"
+                  alt="作品集输出示意：可运行 Live Demo 画面、GitHub 项目代码结构、演讲 Deck 与 Case Study 标签"
+                />
+                <figcaption className="cap">把项目沉淀为 Demo / GitHub / 演讲材料 · 原创风格化渲染</figcaption>
+              </figure>
               </div>
             </Reveal>
             <Reveal delay={70}>
@@ -397,6 +466,23 @@ export default function App() {
                 </ul>
               </div>
             </Reveal>
+            <Reveal delay={65}>
+              <figure className="fig">
+                <div className="fig-head">
+                  <span>Demo Day</span>
+                  <span className="hi">MODEL · CODE · INTERACTION</span>
+                </div>
+                <img
+                  src={IMG('demo.webp')}
+                  width={900}
+                  height={506}
+                  loading="lazy"
+                  decoding="async"
+                  alt="Demo Day 概念舞台：大屏运行 AI 3D Demo，两侧显示模型、代码与交互面板"
+                />
+                <figcaption className="cap">项目公开演示 · 概念化 Demo Day 舞台 · 原创风格化渲染</figcaption>
+              </figure>
+            </Reveal>
             <Reveal delay={70}>
               <p className="pull">
                 你不仅要学会把产品做出来，还要学会站在台上，让别人理解它、记住它，并愿意为它提供下一步机会。
@@ -410,6 +496,14 @@ export default function App() {
 
         {/* ============ 10 · JOIN — dark titanium / QR ============ */}
         <section className="section s-dark qr-section glow" id="join" ref={joinRef}>
+          <div className="qr-deco" aria-hidden="true">
+            <svg viewBox="0 0 300 360" fill="none" stroke="#b8c0c8" strokeWidth="1">
+              <g transform="translate(150 170)">
+                <ellipse rx="120" ry="150" />
+                <path d="M-120 0 Q0 50 120 0 M-96 -66 Q0 -16 96 -66 M-80 70 Q0 120 80 70 M0 -150 L0 150" />
+              </g>
+            </svg>
+          </div>
           <div className="wrap">
             <Reveal>
               <span className="eyebrow">JOIN US</span>
