@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { useReveal } from '../hooks/useReveal'
 import { useJourney } from '../immersive/store'
 import { ContactQR } from './ContactQR'
@@ -40,15 +40,25 @@ function HudZone({
   const open = useJourney((s) => s.expandedZone === id)
   const setExpanded = useJourney((s) => s.setExpanded)
   const { ref, shown } = useReveal<HTMLDivElement>()
+  const bodyRef = useRef<HTMLDivElement>(null)
+
+  // On expand: always start the body at the very top (never inherit a prior
+  // scroll position), so the first line + header are fully visible immediately.
+  useLayoutEffect(() => {
+    if (open && bodyRef.current) bodyRef.current.scrollTop = 0
+  }, [open])
+
+  const toTop = () => bodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+
   return (
     <section className="zone" id={id}>
       <div ref={ref} className={`hud-card reveal${shown ? ' in' : ''}${open ? ' open' : ''}`}>
         <div className="hud-head">
-          <div className="hud-head-row">
+          <div className="hud-head-row" onClick={open ? toTop : undefined}>
             <span className="eyebrow">{eyebrow}</span>
             <span className="hud-prog">{num} / 07</span>
           </div>
-          <h2 className="ov-h2">{title}</h2>
+          <h2 className="ov-h2" onClick={open ? toTop : undefined}>{title}</h2>
           <div className="hud-summary">{summary}</div>
           <div className="hud-actions">
             <button className="hud-expand" onClick={() => setExpanded(open ? null : id)} aria-expanded={open}>
@@ -59,7 +69,7 @@ function HudZone({
             </button>
           </div>
         </div>
-        <div className="hud-body">
+        <div className="hud-body" ref={bodyRef}>
           <div className="hud-body-inner">{details}</div>
         </div>
         <div className="hud-footer">

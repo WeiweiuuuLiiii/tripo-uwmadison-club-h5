@@ -29,9 +29,9 @@ const fire = (beta, gamma) =>
     [beta, gamma],
   )
 
-// first event = zero reference
-await fire(0, 0)
-await p.waitForTimeout(300)
+// calibration: the engine averages the first ~12 stable frames as the neutral centre
+for (let i = 0; i < 16; i++) { await fire(0, 0); await p.waitForTimeout(20) }
+await p.waitForTimeout(400)
 // overlay reference position (must NOT move with the phone)
 const overlayBefore = await p.evaluate(() => {
   const el = document.querySelector('#z03 .hud-head')

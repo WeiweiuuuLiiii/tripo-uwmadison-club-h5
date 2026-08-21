@@ -144,11 +144,36 @@
 .hud-footer .btn { min-height: 48px; }
 .hud-card.open .hud-footer { display: block; }
 
-/* expanded height uses the DYNAMIC viewport (iOS Safari / WeChat toolbars) */
+/* ---- EXPANDED = a fixed Overlay Shell anchored to the REAL visible viewport ----
+   position:fixed + transform:none + visualViewport-driven top/height, so the Shell
+   itself never moves, its top stays below the status bar / Dynamic Island and its
+   bottom above the Safari/WeChat toolbar + Home indicator. Only .hud-body scrolls. */
 .hud-card.open {
-  max-height: calc(100svh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
+  position: fixed;
+  transform: none !important;
+  left: max(12px, env(safe-area-inset-left, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  width: auto;
+  margin: 0;
+  top: calc(var(--vv-top, 0px) + max(10px, env(safe-area-inset-top, 0px)));
+  height: calc(
+    var(--vvh, 100dvh) - max(10px, env(safe-area-inset-top, 0px)) - max(14px, env(safe-area-inset-bottom, 0px)) - 20px
+  );
+  max-height: none;
+  z-index: 40;
 }
+/* sticky, opaque header — always visible, body can't peek behind it */
+.hud-card.open .hud-head {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(180deg, rgba(10, 13, 17, 0.94), rgba(10, 13, 17, 0.78));
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.hud-card.open .hud-head-row,
+.hud-card.open .ov-h2 { cursor: pointer; }
+.hud-card.open .hud-footer { position: relative; z-index: 2; }
+.hud-body { scrollbar-gutter: stable; }
 
 /* ---- Zone 01 / 07 hero-style copy ---- */
 .ov-kicker {
@@ -340,7 +365,7 @@
   .ov-panel { max-width: min(540px, 40vw); margin-left: max(5vw, 72px); }
   .zone.center .ov-panel { margin: 0 auto; max-width: 620px; }
   .hud-card { max-width: min(520px, 40vw); margin-left: max(5vw, 72px); max-height: 60vh; }
-  .hud-card.open { max-height: 88vh; }
+  .hud-card.open { left: max(5vw, 72px); right: auto; width: min(520px, 40vw); max-height: none; }
   .fact-grid { grid-template-columns: 1fr 1fr 1fr; }
   .deck-cols { grid-template-columns: 1fr 1fr; gap: 20px; }
   .prog-rail { left: 22px; }
@@ -461,6 +486,29 @@
   animation: gyro-fade 2.6s ease forwards;
 }
 @keyframes gyro-fade { 0% { opacity: 0; } 12%, 72% { opacity: 1; } 100% { opacity: 0; } }
+.gyro-recal {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  transform: translateX(-50%);
+  z-index: 33;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--silver);
+  padding: 7px 13px;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(184, 192, 200, 0.24);
+  background: rgba(10, 13, 17, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.gyro-recal .g-ic { color: var(--ice); font-size: 13px; line-height: 1; }
+.gyro-recal:active { transform: translateX(-50%) translateY(1px); }
 
 /* ============================================================ Expanded-panel layout
    When any HUD card is expanded, every floating element gets out of the way so
@@ -468,13 +516,21 @@
 .panel-expanded .prog-rail,
 .panel-expanded .mode-toggle,
 .panel-expanded .gyro-btn,
+.panel-expanded .gyro-recal,
 .panel-expanded .gyro-toast {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
 }
-/* the expanded card sits above the vignette/scan and fills from the bottom */
-.panel-expanded .zone .hud-card.open { z-index: 5; }
+/* dim the world behind the expanded shell for focus */
+.panel-expanded .canvas-layer::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  background: rgba(6, 8, 11, 0.28);
+  pointer-events: none;
+}
 
 /* ---- small phones: compact edge rail (never intrudes into the card) ---- */
 @media (max-width: 480px) {

@@ -1,8 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { heroReveal, lookCurve, pathCurve, railU, zoneOf } from './rail'
+import { GYRO, heroReveal, lookCurve, pathCurve, railU, zoneOf } from './rail'
 import { frame, useJourney } from './store'
+
+const _p = new THREE.Vector3()
+const _l = new THREE.Vector3()
 
 /** document scroll → 0..1 progress. */
 function scrollProgress(): number {
@@ -80,23 +83,29 @@ export function Rig() {
     pos.current.lerp(targetPos, k)
     look.current.lerp(targetLook, k)
 
-    camera.position.copy(pos.current)
-    camera.lookAt(look.current)
-    // finalCamera = scrollRail + gyroOffset + dragOffset
-    const yaw = frame.dragYaw + frame.gyroYaw
-    const pitch = frame.dragPitch + frame.gyroPitch
-    camera.rotateY(yaw)
-    camera.rotateX(pitch)
-    // positional parallax from the gyro (near objects shift more than far)
-    const MAX_YAW = 0.157 // rad ≈ 9°
-    const MAX_PITCH = 0.105 // rad ≈ 6°
-    camera.translateX(THREE.MathUtils.clamp((frame.gyroYaw / MAX_YAW) * 0.42, -0.42, 0.42))
-    camera.translateY(THREE.MathUtils.clamp((frame.gyroPitch / MAX_PITCH) * 0.22, -0.22, 0.22))
-    // finger drag recentres; gyro is held by its own low-pass
+    // finalCamera = scrollRail + gyroOffset(zone-aware) + dragOffset
+    const zi = zoneOf(offset)
+    const g = GYRO[zi]
+    const gx = frame.gyroX
+    const gy = frame.gyroY
+    // POSITION parallax (near objects shift more than the far city)
+    _p.set(
+      pos.current.x + gx * g.posX,
+      pos.current.y + gy * g.posY,
+      pos.current.z - Math.abs(gy) * g.posZ,
+    )
+    camera.position.copy(_p)
+    // LOOK-AT target follows a little (orbit around the subject + slight pan)
+    _l.set(look.current.x + gx * g.look, look.current.y + gy * g.look * 0.6, look.current.z)
+    camera.lookAt(_l)
+    // a touch of extra angular look so you "turn to see" the space, + finger drag
+    camera.rotateY(frame.dragYaw + gx * g.yaw)
+    camera.rotateX(frame.dragPitch + gy * g.pitch)
+    // finger drag recentres; gyro is held by its own adaptive filter
     frame.dragYaw = THREE.MathUtils.lerp(frame.dragYaw, 0, 1 - Math.pow(0.02, dt))
     frame.dragPitch = THREE.MathUtils.lerp(frame.dragPitch, 0, 1 - Math.pow(0.02, dt))
 
-    if (!frame.locked) setZone(zoneOf(offset))
+    if (!frame.locked) setZone(zi)
     if (!started.current) {
       started.current = true
       setReady(true)

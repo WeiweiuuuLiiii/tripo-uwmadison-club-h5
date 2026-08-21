@@ -41,9 +41,10 @@ export const frame = {
   reveal: 0, // 0..1 hero generation (point-cloud → wireframe → textured)
   dragYaw: 0, // clamped radians, finger look-around
   dragPitch: 0,
-  gyroYaw: 0, // clamped radians, device-orientation look
-  gyroPitch: 0,
-  gyroGain: 1, // 1 normal, reduced when a card is expanded / near QR
+  gyroX: 0, // -1..1 normalised device-orientation look (gain applied), yaw axis
+  gyroY: 0, // -1..1 normalised device-orientation look (gain applied), pitch axis
+  gyroGain: 1, // current (ramped) amplitude
+  gyroGainTarget: 1, // 1 normal · 0 when a card is expanded / QR long-pressed · ~0.4 near QR
   reducedMotion: false, // calms spins/particles; the 3D world still runs
   locked: false, // outer scroll frozen (card expanded) → hold camera in this zone
 }

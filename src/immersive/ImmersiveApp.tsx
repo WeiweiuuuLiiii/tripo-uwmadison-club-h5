@@ -7,9 +7,11 @@ import { ProgressRail } from '../overlay/ProgressRail'
 import { ModeToggle } from '../overlay/ModeToggle'
 import { GyroButton } from '../overlay/GyroButton'
 import { useScrollLock } from '../overlay/useScrollLock'
+import { useVisualViewport } from '../overlay/useVisualViewport'
 import { useJourney, frame } from './store'
 import { preloadCore } from './models'
 import { prefersReducedMotion } from '../lib/mode'
+import { recenter } from './gyro'
 
 const Canvas3D = lazy(() => import('./Canvas3D'))
 preloadCore()
@@ -22,8 +24,9 @@ export default function ImmersiveApp({ onFail }: { onFail: () => void }) {
   const started = useRef(false)
   const expanded = expandedZone !== null
 
-  // While a card is expanded: freeze the outer scroll (camera holds this zone),
-  // let the card body scroll on its own.
+  // Keep CSS in sync with the real visible viewport (toolbars/notch) and freeze
+  // the outer scroll while a card is expanded (camera holds this zone).
+  useVisualViewport()
   useScrollLock(expanded)
 
   useEffect(() => {
@@ -54,10 +57,19 @@ export default function ImmersiveApp({ onFail }: { onFail: () => void }) {
     return () => r.classList.remove('panel-expanded')
   }, [expanded])
 
-  // gyro amplitude: calm while reading a card, and near the QR
+  // gyro amplitude target (ramped in the gyro loop): full while exploring, a
+  // touch calmer in the QR zone, fully frozen while reading an expanded card.
   useEffect(() => {
-    frame.gyroGain = expanded ? 0.18 : zoneIndex === 6 ? 0.15 : 1
+    frame.gyroGainTarget = expanded ? 0 : zoneIndex === 6 ? 0.4 : 1
   }, [expanded, zoneIndex])
+
+  // returning from an expanded card: re-centre on the CURRENT pose so the camera
+  // eases from neutral instead of snapping back to the old angle.
+  const prevExpanded = useRef(false)
+  useEffect(() => {
+    if (prevExpanded.current && !expanded) recenter()
+    prevExpanded.current = expanded
+  }, [expanded])
 
   return (
     <div className="immersive">
