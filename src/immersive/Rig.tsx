@@ -1,24 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { GYRO, heroReveal, lookCurve, pathCurve, railU, zoneOf } from './rail'
+import { heroReveal, lookCurve, pathCurve } from './rail'
+import { activeSection, initSectionRail, railProgress } from './sectionRail'
 import { frame, useJourney } from './store'
 
-const _p = new THREE.Vector3()
-const _l = new THREE.Vector3()
-
-/** document scroll → 0..1 progress. */
-function scrollProgress(): number {
-  const doc = document.documentElement
-  const max = doc.scrollHeight - window.innerHeight
-  return max > 0 ? THREE.MathUtils.clamp(window.scrollY / max, 0, 1) : 0
-}
-
 /**
- * Turns native document scroll into a guided camera. Position/look are sampled
- * from the two Catmull-Rom rails via the dwell reparam (railU), damped for
- * momentum, then a small clamped drag offset lets the user peek off-axis without
- * ever leaving the path.
+ * Drives the camera from NATIVE document scroll via real DOM section positions
+ * (sectionRail), so it stays correct as cards expand and section heights change.
+ * The camera dwells on the current zone while you read, then eases to the next as
+ * that section arrives. Desktop mice can lightly drag to look; touch never drags
+ * (single-finger swipes belong entirely to native page scroll).
  */
 export function Rig() {
   const { camera } = useThree()
@@ -30,25 +22,20 @@ export function Rig() {
   const started = useRef(false)
 
   useEffect(() => {
-    frame.offset = scrollProgress()
-    const onScroll = () => {
-      frame.offset = scrollProgress()
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('resize', onScroll, { passive: true })
+    const disposeRail = initSectionRail()
 
-    // Drag-to-look: horizontal drag = yaw, slight vertical = pitch, clamped and
-    // eased back to centre on release. Passive listeners never block scrolling.
+    // Desktop mouse-drag look only. Touch is ignored so page scroll is untouched.
     let dragging = false
     let sx = 0
     let sy = 0
     const down = (e: PointerEvent) => {
+      if (e.pointerType !== 'mouse') return
       dragging = true
       sx = e.clientX
       sy = e.clientY
     }
     const move = (e: PointerEvent) => {
-      if (!dragging) return
+      if (!dragging || e.pointerType !== 'mouse') return
       const w = window.innerWidth || 1
       frame.dragYaw = THREE.MathUtils.clamp(((e.clientX - sx) / w) * 0.5, -0.14, 0.14)
       frame.dragPitch = THREE.MathUtils.clamp(((e.clientY - sy) / w) * 0.3, -0.06, 0.06)
@@ -61,8 +48,7 @@ export function Rig() {
     window.addEventListener('pointerup', up, { passive: true })
     window.addEventListener('pointercancel', up, { passive: true })
     return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('resize', onScroll)
+      disposeRail()
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
@@ -71,41 +57,25 @@ export function Rig() {
   }, [])
 
   useFrame((_, delta) => {
-    const offset = frame.offset
-    frame.reveal = heroReveal(offset)
+    const u = railProgress()
+    frame.offset = u
+    frame.reveal = heroReveal(u)
 
-    const u = railU(offset)
     const targetPos = pathCurve.getPointAt(u)
     const targetLook = lookCurve.getPointAt(Math.min(u + 0.015, 1))
-
     const dt = Math.min(delta, 0.05)
-    const k = 1 - Math.pow(0.0016, dt) // frame-rate independent damping
+    const k = 1 - Math.pow(0.0016, dt) // frame-rate independent damping (absorbs height changes smoothly)
     pos.current.lerp(targetPos, k)
     look.current.lerp(targetLook, k)
 
-    // finalCamera = scrollRail + gyroOffset(zone-aware) + dragOffset
-    const zi = zoneOf(offset)
-    const g = GYRO[zi]
-    const gx = frame.gyroX
-    const gy = frame.gyroY
-    // POSITION parallax (near objects shift more than the far city)
-    _p.set(
-      pos.current.x + gx * g.posX,
-      pos.current.y + gy * g.posY,
-      pos.current.z - Math.abs(gy) * g.posZ,
-    )
-    camera.position.copy(_p)
-    // LOOK-AT target follows a little (orbit around the subject + slight pan)
-    _l.set(look.current.x + gx * g.look, look.current.y + gy * g.look * 0.6, look.current.z)
-    camera.lookAt(_l)
-    // a touch of extra angular look so you "turn to see" the space, + finger drag
-    camera.rotateY(frame.dragYaw + gx * g.yaw)
-    camera.rotateX(frame.dragPitch + gy * g.pitch)
-    // finger drag recentres; gyro is held by its own adaptive filter
+    camera.position.copy(pos.current)
+    camera.lookAt(look.current)
+    camera.rotateY(frame.dragYaw)
+    camera.rotateX(frame.dragPitch)
     frame.dragYaw = THREE.MathUtils.lerp(frame.dragYaw, 0, 1 - Math.pow(0.02, dt))
     frame.dragPitch = THREE.MathUtils.lerp(frame.dragPitch, 0, 1 - Math.pow(0.02, dt))
 
-    if (!frame.locked) setZone(zi)
+    setZone(activeSection())
     if (!started.current) {
       started.current = true
       setReady(true)

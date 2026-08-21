@@ -51,45 +51,43 @@
   color: var(--fg);
 }
 
-/* each zone = one full-height scroll stop; camera dwells while you read it */
+/* ONE continuous native-scroll column. Each zone is ≥ one screen tall and GROWS
+   in flow when its card expands — no modal, no scroll lock, no nested scroller. */
 .zone {
   position: relative;
   min-height: 100svh;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 96px 0;
-}
-.zone.center { text-align: center; }
-/* content zones: panel sits low so the 3D subject reads in the upper area */
-.zone:not(.center) { align-items: flex-end; }
-.zone:first-child { padding-top: calc(var(--safe-top) + 96px); }
-.zone:last-child { padding-bottom: calc(96px + var(--safe-bottom)); }
-
-.ov-panel {
-  position: relative;
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: 0 var(--pad);
-}
-
-/* ---- content zones: a compact frosted HUD card pinned to the lower ~40% ---- */
-.hud-card {
-  position: relative;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: visible;
+  padding-bottom: 24px;
+}
+.zone.center { text-align: center; }
+.zone:first-child { padding-top: var(--safe-top); }
+.zone:last-child { padding-bottom: calc(40px + var(--safe-bottom)); }
+
+/* transparent spacer: the 3D world shows here. Fixed height so the card TOP never
+   moves when details expand below it. */
+.scene-view-area { flex: 0 0 auto; height: 58svh; height: 58dvh; pointer-events: none; }
+.scene-view-area.tall { height: 50svh; height: 50dvh; }
+
+/* ---- HUD card: lives in NORMAL document flow. overflow:visible → no nested
+   scroller. Expanding details just makes the card (and the section) taller. ---- */
+.hud-card {
+  position: relative;
   width: calc(100% - 2 * var(--pad));
   max-width: 560px;
-  margin: 0 var(--pad);
+  margin: 12px var(--pad) 0;
+  padding: 16px 18px 18px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(9, 12, 16, 0.62), rgba(7, 9, 12, 0.5));
+  background: linear-gradient(180deg, rgba(9, 12, 16, 0.64), rgba(7, 9, 12, 0.52));
   -webkit-backdrop-filter: saturate(135%) blur(14px);
   backdrop-filter: saturate(135%) blur(14px);
   box-shadow: var(--shadow), inset 0 0 0 1px rgba(110, 231, 255, 0.04);
-  overflow: hidden;
+  overflow: visible;
 }
+.zone.center .hud-card { margin-left: auto; margin-right: auto; }
 .hud-card::before {
   content: "";
   position: absolute;
@@ -97,15 +95,12 @@
   right: 16px;
   top: 0;
   height: 1px;
-  z-index: 3;
   background: linear-gradient(90deg, transparent, rgba(110, 231, 255, 0.55), transparent);
 }
-/* sticky header (always visible) */
-.hud-head { flex: 0 0 auto; padding: 16px 18px 14px; }
-.hud-head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 2px; }
+.hud-head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
 .hud-head-row .eyebrow { margin: 0; }
 .hud-prog { flex: 0 0 auto; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--ice); }
-.hud-summary { margin-top: 8px; }
+.hud-summary { margin-top: 6px; }
 .hud-summary > * { margin-top: 0; }
 .hud-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .hud-expand, .hud-join {
@@ -122,58 +117,18 @@
 .hud-expand { color: var(--ice); background: rgba(110, 231, 255, 0.08); border: 1px solid rgba(110, 231, 255, 0.28); }
 .hud-join { color: #f2f5f8; background: linear-gradient(180deg, #2b3138, #171b20); border: 1px solid rgba(184, 192, 200, 0.28); }
 .hud-expand .chev, .hud-join .chev { font-size: 10px; }
-.hud-card.open .hud-join { display: none; }
 
-/* scrollable body */
-.hud-body { flex: 1 1 auto; min-height: 0; max-height: 0; overflow: hidden; opacity: 0; padding: 0 18px; }
-.hud-body-inner { padding-top: 4px; padding-bottom: 20px; }
-.hud-card.open .hud-body {
-  max-height: none;
-  opacity: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-  -webkit-overflow-scrolling: touch;
-  scroll-padding-bottom: 32px;
+/* details expand IN FLOW via a grid-rows height transition (no scroll box). The
+   inner overflow:hidden only clips the reveal — it is NOT a scroll container. */
+.hud-details {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-top: 0;
+  transition: grid-template-rows 0.42s cubic-bezier(0.22, 0.7, 0.2, 1), opacity 0.3s ease, margin-top 0.32s ease;
 }
-/* leave room so the last line clears the footer CTA + safe area */
-.hud-card.open .hud-body-inner { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
-
-/* footer CTA (only when expanded) */
-.hud-footer { flex: 0 0 auto; display: none; padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); background: linear-gradient(180deg, rgba(9, 12, 16, 0.1), rgba(7, 9, 12, 0.85)); }
-.hud-footer .btn { min-height: 48px; }
-.hud-card.open .hud-footer { display: block; }
-
-/* ---- EXPANDED = a fixed Overlay Shell anchored to the REAL visible viewport ----
-   position:fixed + transform:none + visualViewport-driven top/height, so the Shell
-   itself never moves, its top stays below the status bar / Dynamic Island and its
-   bottom above the Safari/WeChat toolbar + Home indicator. Only .hud-body scrolls. */
-.hud-card.open {
-  position: fixed;
-  transform: none !important;
-  left: max(12px, env(safe-area-inset-left, 0px));
-  right: max(12px, env(safe-area-inset-right, 0px));
-  width: auto;
-  margin: 0;
-  top: calc(var(--vv-top, 0px) + max(10px, env(safe-area-inset-top, 0px)));
-  height: calc(
-    var(--vvh, 100dvh) - max(10px, env(safe-area-inset-top, 0px)) - max(14px, env(safe-area-inset-bottom, 0px)) - 20px
-  );
-  max-height: none;
-  z-index: 40;
-}
-/* sticky, opaque header — always visible, body can't peek behind it */
-.hud-card.open .hud-head {
-  position: relative;
-  z-index: 2;
-  background: linear-gradient(180deg, rgba(10, 13, 17, 0.94), rgba(10, 13, 17, 0.78));
-  border-bottom: 1px solid var(--line);
-  cursor: pointer;
-}
-.hud-card.open .hud-head-row,
-.hud-card.open .ov-h2 { cursor: pointer; }
-.hud-card.open .hud-footer { position: relative; z-index: 2; }
-.hud-body { scrollbar-gutter: stable; }
+.hud-details-inner { overflow: hidden; min-height: 0; }
+.hud-card.open .hud-details { grid-template-rows: 1fr; opacity: 1; margin-top: 16px; }
 
 /* ---- Zone 01 / 07 hero-style copy ---- */
 .ov-kicker {
@@ -297,15 +252,6 @@
 
 /* ---- Zone 07 QR block ---- */
 .qr-block { text-align: center; }
-.join-cta {
-  position: fixed;
-  right: var(--pad);
-  bottom: calc(16px + var(--safe-bottom));
-  z-index: 30;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.join-cta .btn { width: auto; min-height: 46px; padding: 0 22px; box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); }
-.join-cta.hidden { opacity: 0; transform: translateY(140%); pointer-events: none; }
 
 /* ---- progress rail (01–07) ---- */
 .prog-rail {
@@ -362,10 +308,8 @@
 /* ---- desktop: give the overlay a readable column, rail room ---- */
 @media (min-width: 900px) {
   /* content panels take at most ~40% width; the 3D world fills the rest */
-  .ov-panel { max-width: min(540px, 40vw); margin-left: max(5vw, 72px); }
-  .zone.center .ov-panel { margin: 0 auto; max-width: 620px; }
-  .hud-card { max-width: min(520px, 40vw); margin-left: max(5vw, 72px); max-height: 60vh; }
-  .hud-card.open { left: max(5vw, 72px); right: auto; width: min(520px, 40vw); max-height: none; }
+  .hud-card { max-width: min(520px, 40vw); margin-left: max(5vw, 72px); }
+  .zone.center .hud-card { margin-left: auto; margin-right: auto; max-width: 620px; }
   .fact-grid { grid-template-columns: 1fr 1fr 1fr; }
   .deck-cols { grid-template-columns: 1fr 1fr; gap: 20px; }
   .prog-rail { left: 22px; }
@@ -442,96 +386,6 @@
 .fail-btns { display: grid; gap: 10px; }
 .fail-card .btn-ghost { color: #eaf2f8; border-color: rgba(184, 192, 200, 0.4); background: rgba(184, 192, 200, 0.06); }
 
-/* ============================================================ Gyro button */
-.gyro-btn {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
-  transform: translateX(-50%);
-  z-index: 34;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 16px;
-  min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid rgba(110, 231, 255, 0.4);
-  background: rgba(10, 13, 17, 0.72);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
-  transition: opacity 0.4s ease, transform 0.3s ease;
-}
-.gyro-btn .g-ic { color: var(--ice); font-size: 16px; line-height: 1; }
-.gyro-btn .g-tx { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.1; }
-.gyro-btn .g-tx b { font-size: 13px; font-weight: 600; color: #eef3f7; }
-.gyro-btn .g-tx i { font-family: var(--font-mono); font-style: normal; font-size: 9px; letter-spacing: 0.14em; color: var(--silver); }
-.gyro-btn:active { transform: translateX(-50%) translateY(1px); }
-.gyro-toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-  transform: translateX(-50%);
-  z-index: 34;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: #eef3f7;
-  padding: 9px 16px;
-  border-radius: 999px;
-  background: rgba(10, 13, 17, 0.78);
-  border: 1px solid rgba(110, 231, 255, 0.4);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  animation: gyro-fade 2.6s ease forwards;
-}
-@keyframes gyro-fade { 0% { opacity: 0; } 12%, 72% { opacity: 1; } 100% { opacity: 0; } }
-.gyro-recal {
-  position: fixed;
-  left: 50%;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
-  transform: translateX(-50%);
-  z-index: 33;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--silver);
-  padding: 7px 13px;
-  min-height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(184, 192, 200, 0.24);
-  background: rgba(10, 13, 17, 0.6);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-.gyro-recal .g-ic { color: var(--ice); font-size: 13px; line-height: 1; }
-.gyro-recal:active { transform: translateX(-50%) translateY(1px); }
-
-/* ============================================================ Expanded-panel layout
-   When any HUD card is expanded, every floating element gets out of the way so
-   nothing overlaps the card's title / body / border. */
-.panel-expanded .prog-rail,
-.panel-expanded .mode-toggle,
-.panel-expanded .gyro-btn,
-.panel-expanded .gyro-recal,
-.panel-expanded .gyro-toast {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-/* dim the world behind the expanded shell for focus */
-.panel-expanded .canvas-layer::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 3;
-  background: rgba(6, 8, 11, 0.28);
-  pointer-events: none;
-}
-
 /* ---- small phones: compact edge rail (never intrudes into the card) ---- */
 @media (max-width: 480px) {
   .prog-rail { left: 8px; gap: 7px; }
@@ -543,7 +397,6 @@
 
 /* very small / legacy screens */
 @media (max-width: 360px) {
-  .hud-head { padding: 13px 15px 12px; }
   .ov-h2 { font-size: clamp(20px, 6.2vw, 26px); }
   .fact-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -551,5 +404,5 @@
 /* ---- reduced motion: the loader + spins calm down (Lite usually takes over) ---- */
 @media (prefers-reduced-motion: reduce) {
   .wl-ring, .wl-core, .wl-fill, .ov-hint .bar { animation: none !important; }
-  .gyro-toast { animation: none !important; }
+  .hud-details { transition: opacity 0.2s ease !important; }
 }

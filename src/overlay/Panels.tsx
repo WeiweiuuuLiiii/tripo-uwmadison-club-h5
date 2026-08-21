@@ -1,6 +1,5 @@
-import { useLayoutEffect, useRef, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useReveal } from '../hooks/useReveal'
-import { useJourney } from '../immersive/store'
 import { ContactQR } from './ContactQR'
 
 /** Fade/rise a block in when it enters view (never leaves content invisible). */
@@ -16,11 +15,12 @@ function R({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
 const scrollToJoin = () => document.getElementById('z07')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
 /**
- * A guided-journey zone card. Collapsed = a compact summary in the lower ~40%,
- * 3D visible above. Expanded = a flex column of [sticky header · scrollable body
- * · footer CTA] sized to the dynamic viewport (dvh) with safe-area insets, so the
- * last line always clears the CTA and the notch/toolbar. Only one card expands at
- * a time (global store) and expanding never moves the camera (see useScrollLock).
+ * A guided-journey section: a transparent scene spacer (3D shows through) above a
+ * HUD card. Tapping 展开详情 reveals the details IN FLOW — the section simply grows
+ * taller, so the page keeps scrolling straight on into the next section whether the
+ * card is open or closed. No modal, no scroll lock, no internal scroller. The
+ * card's top stays put (it sits after a fixed-height scene spacer); details animate
+ * open below the actions via a grid-rows height transition.
  */
 function HudZone({
   id,
@@ -37,52 +37,30 @@ function HudZone({
   summary: ReactNode
   details: ReactNode
 }) {
-  const open = useJourney((s) => s.expandedZone === id)
-  const setExpanded = useJourney((s) => s.setExpanded)
-  const { ref, shown } = useReveal<HTMLDivElement>()
-  const bodyRef = useRef<HTMLDivElement>(null)
-
-  // On expand: always start the body at the very top (never inherit a prior
-  // scroll position), so the first line + header are fully visible immediately.
-  useLayoutEffect(() => {
-    if (open && bodyRef.current) bodyRef.current.scrollTop = 0
-  }, [open])
-
-  const toTop = () => bodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-
+  const [open, setOpen] = useState(false)
   return (
     <section className="zone" id={id}>
-      <div ref={ref} className={`hud-card reveal${shown ? ' in' : ''}${open ? ' open' : ''}`}>
-        <div className="hud-head">
-          <div className="hud-head-row" onClick={open ? toTop : undefined}>
+      <div className="scene-view-area" aria-hidden="true" />
+      <div className={`hud-card${open ? ' open' : ''}`}>
+        <R>
+          <div className="hud-head-row">
             <span className="eyebrow">{eyebrow}</span>
             <span className="hud-prog">{num} / 07</span>
           </div>
-          <h2 className="ov-h2" onClick={open ? toTop : undefined}>{title}</h2>
+          <h2 className="ov-h2">{title}</h2>
           <div className="hud-summary">{summary}</div>
           <div className="hud-actions">
-            <button className="hud-expand" onClick={() => setExpanded(open ? null : id)} aria-expanded={open}>
+            <button className="hud-expand" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
               {open ? '收起' : '展开详情'} <span className="chev">{open ? '▴' : '▾'}</span>
             </button>
             <button className="hud-join" onClick={scrollToJoin}>
               立即加入 <span className="chev">→</span>
             </button>
           </div>
-        </div>
-        <div className="hud-body" ref={bodyRef}>
-          <div className="hud-body-inner">{details}</div>
-        </div>
-        <div className="hud-footer">
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              setExpanded(null)
-              scrollToJoin()
-            }}
-          >
-            立即加入
-          </button>
-        </div>
+          <div className="hud-details">
+            <div className="hud-details-inner">{details}</div>
+          </div>
+        </R>
       </div>
     </section>
   )
@@ -93,7 +71,8 @@ export function Panels() {
     <>
       {/* 01 · PORTAL */}
       <section className="zone center" id="z01">
-        <div className="ov-panel">
+        <div className="scene-view-area tall" aria-hidden="true" />
+        <div className="hud-card intro">
           <R>
             <div className="ov-kicker">
               <span className="dot" /> UW–MADISON&nbsp;&nbsp;×&nbsp;&nbsp;TRIPO
@@ -169,7 +148,7 @@ export function Panels() {
         num="04"
         eyebrow="PROJECT LAB · 项目实验室"
         title="这里不是每月听一次讲座，而是一支真正做项目的团队"
-        summary={<p className="ov-lead">轻触上方工作台可以观察每一类真实 3D 资产：角色、载具、道具与场景。</p>}
+        summary={<p className="ov-lead">上方工作台展示每一类真实 3D 资产：角色、载具、道具与场景。</p>}
         details={
           <>
             <div className="duo">
@@ -256,12 +235,18 @@ export function Panels() {
       />
 
       {/* 07 · JOIN */}
-      <section className="zone center" id="z07">
-        <div className="ov-panel">
+      <section className="zone" id="z07">
+        <div className="scene-view-area" aria-hidden="true" />
+        <div className="hud-card join">
           <R>
             <span className="eyebrow">JOIN THE WORLD · 加入</span>
             <div className="statement">
               <p>下一批 AI 3D 作品，不应该只是被你刷到。<br />它们可以由你<span className="ice">亲手做出来</span>。</p>
+            </div>
+            <div className="chips">
+              {['Unity / Unreal / 游戏开发', 'Python / AI / 工具开发', 'Blender / 3D 建模 / 动画', 'UI/UX / 视觉设计', '产品 / 项目管理', '建筑 / 艺术 / 工业设计', '内容 / 摄影 / 视频', '零基础但想动手的你'].map((t, i) => (
+                <span className={`chip${i % 3 === 0 ? ' k' : ''}`} key={i}>{t}</span>
+              ))}
             </div>
           </R>
           <R delay={70}>

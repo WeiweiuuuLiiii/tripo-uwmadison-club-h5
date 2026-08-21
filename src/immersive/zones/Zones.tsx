@@ -151,7 +151,7 @@ function ZoneJourney() {
     { x: 6, url: MODELS.city, fit: 3.2 },
   ]
   useFrame(() => {
-    const p = THREE.MathUtils.clamp((frame.offset - 0.57) / (0.71 - 0.57), 0, 1) * 6
+    const p = THREE.MathUtils.clamp((frame.offset - 0.57) / (0.76 - 0.57), 0, 1) * 6
     dots.current.forEach((m, i) => {
       if (!m) return
       const lit = p > i + 0.5
